@@ -1,0 +1,74 @@
+/* =========================================================
+   Utility Classes
+   ========================================================= */
+
+/* ---- Stack spacing ---- */
+.u-stack-sm > * + * {
+  margin-top: var(--space-2);
+}
+
+.u-stack-md > * + * {
+  margin-top: var(--space-4);
+}
+
+/* ---- Panel ---- */
+.u-panel {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
+}
+
+.u-panel--spacious {
+  padding: var(--space-6);
+}
+
+.u-panel--dashed {
+  border-style: dashed;
+  border-color: var(--color-border-strong);
+}
+
+.u-panel--danger {
+  border-color: var(--color-danger-border);
+  background: var(--color-danger-surface);
+}
+
+/* ---- Text ---- */
+.u-text-center {
+  text-align: center;
+}
+
+.u-text-title {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.u-text-muted {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.u-text-danger {
+  color: var(--color-danger-text);
+}
+
+.u-text-danger-muted {
+  color: var(--color-danger-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.u-measure {
+  max-width: var(--content-measure);
+}
+
+@media (min-width: 720px) {
+  .u-panel {
+    padding: var(--space-5);
+  }
+}

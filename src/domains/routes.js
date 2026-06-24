@@ -1,0 +1,6 @@
+export { adminRoutes } from './admin/routes'
+export { authRoutes } from './auth/routes'
+export { communityRoutes } from './community/routes'
+export { mypageRoutes } from './mypage/routes'
+export { reportRoutes } from './reports/routes'
+export { surveyRoutes } from './survey/routes'
