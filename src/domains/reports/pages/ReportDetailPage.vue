@@ -229,6 +229,12 @@ async function deleteReport() {
 }
 
 async function sendChatMessage(content) {
+  const blockedMessage = getLocalChatGuardrailMessage(content)
+  if (blockedMessage) {
+    chatError.value = blockedMessage
+    return
+  }
+
   const userMessage = {
     id: `local-${Date.now()}`,
     role: 'user',
@@ -248,6 +254,28 @@ async function sendChatMessage(content) {
   } finally {
     isChatSubmitting.value = false
   }
+}
+
+function getLocalChatGuardrailMessage(content) {
+  const unsafeKeywords = [
+    '진단해줘',
+    '처방해줘',
+    '약 끊',
+    '약 중단',
+    '약 늘려',
+    '약 줄여',
+    '이전 지시 무시',
+    '시스템 프롬프트',
+    'system prompt',
+    'ignore previous',
+  ]
+  const normalizedContent = content.toLowerCase()
+
+  if (unsafeKeywords.some((keyword) => normalizedContent.includes(keyword.toLowerCase()))) {
+    return '의학적 진단, 처방, 약물 변경 요청은 답변할 수 없습니다. 질환이 있거나 약을 복용 중인 경우 전문가와 상담하세요.'
+  }
+
+  return ''
 }
 
 function formatList(value) {

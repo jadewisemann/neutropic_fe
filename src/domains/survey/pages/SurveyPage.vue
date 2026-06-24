@@ -163,7 +163,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { reportApi } from '../../../shared/api'
 import {
   BaseButton,
   ContentSection,
@@ -224,42 +223,20 @@ async function handleCreateReportRequest() {
   clarificationQuestions.value = []
 
   try {
-    const report = await reportApi.create(buildReportPayload(state, optionGroups))
-
-    if (report?.status === 'needs_clarification') {
-      clarificationQuestions.value = Array.isArray(report.questions) ? report.questions : []
-      submitError.value = '추가 확인 질문을 확인해 주세요.'
-      showValidationFor('additional_notes')
-      return
-    }
-
-    storeLatestReport(report)
-    router.push('/reports/new')
+    storePendingReportPayload(buildReportPayload(state, optionGroups))
+    await router.push('/reports/generating')
   } catch (error) {
-    submitError.value = getCreateReportErrorMessage(error)
-  } finally {
+    submitError.value = error?.message || '리포트 생성 준비에 실패했습니다.'
     isSubmitting.value = false
+  } finally {
+    if (router.currentRoute.value.path !== '/reports/generating') {
+      isSubmitting.value = false
+    }
   }
 }
 
-function getCreateReportErrorMessage(error) {
-  if (error?.errorCode === 'rate_limit_exceeded') {
-    return '오늘 생성 가능한 리포트 횟수를 초과했습니다. 잠시 후 다시 시도해 주세요.'
-  }
-
-  if (error?.errorCode === 'validation_error') {
-    return error.message || '설문 입력값을 확인해 주세요.'
-  }
-
-  if (error?.errorCode === 'ai_server_error' || error?.isServerError) {
-    return 'AI 리포트 생성 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.'
-  }
-
-  return error?.message || '리포트 생성 요청에 실패했습니다.'
-}
-
-function storeLatestReport(report) {
-  window.sessionStorage.setItem('neutripic:latest_report', JSON.stringify(report))
+function storePendingReportPayload(payload) {
+  window.sessionStorage.setItem('neutripic:pending_report_payload', JSON.stringify(payload))
 }
 </script>
 
