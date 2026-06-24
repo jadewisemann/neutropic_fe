@@ -32,7 +32,10 @@ export function createApiClient({ baseUrl = API_BASE_URL, getAccessToken = authT
     }
 
     try {
-      const response = await fetch(createUrl(baseUrl, endpoint, query), {
+      const url = createUrl(baseUrl, endpoint, query)
+      debugApiRequest({ baseUrl, endpoint, url })
+
+      const response = await fetch(url, {
         method,
         headers: requestHeaders,
         body: requestBody,
@@ -130,6 +133,21 @@ function createUrl(baseUrl, endpoint, query) {
   })
 
   return url.toString()
+}
+
+function debugApiRequest({ baseUrl, endpoint, url }) {
+  if (typeof window === 'undefined') return
+
+  window.__NUETRIPIC_API_DEBUG__ = {
+    viteApiBaseUrl: import.meta.env.VITE_API_BASE_URL,
+    resolvedBaseUrl: baseUrl,
+    endpoint,
+    url,
+  }
+
+  if (import.meta.env.DEV || import.meta.env.VITE_DEBUG_API === 'true') {
+    console.info('[api]', window.__NUETRIPIC_API_DEBUG__)
+  }
 }
 
 function joinUrl(baseUrl, endpoint) {
