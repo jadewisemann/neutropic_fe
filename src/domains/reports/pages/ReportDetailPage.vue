@@ -1,7 +1,11 @@
 <template>
-  <ReportLayout>
+  <ReportLayout :title="report?.title || '저장된 추천 리포트 상세'">
     <template #actions>
-      <RouterLink class="report-back-link" to="/reports">← 추천 기록</RouterLink>
+      <div class="report-actions">
+        <BaseButton :disabled="!report" @click="renameReport">제목 수정</BaseButton>
+        <BaseButton :disabled="!report" variant="danger" @click="deleteReport">삭제</BaseButton>
+        <BaseButton to="/reports">목록 이동</BaseButton>
+      </div>
     </template>
 
     <LoadingState v-if="isLoading" label="리포트를 불러오는 중입니다" />
@@ -20,31 +24,19 @@
     </ErrorState>
 
     <template v-else-if="report">
-      <!-- Header card -->
-      <div class="report-header-card">
-        <div class="report-header-card__badges">
-          <span class="badge badge--blue">iDISK 근거</span>
-          <span v-for="goal in topGoals" :key="goal" class="badge badge--brand">{{ goal }}</span>
-        </div>
-        <h1>{{ report.title }}</h1>
-        <p>입력하신 정보를 바탕으로 정리한 성분 중심 안내입니다.</p>
-        <div class="report-header-card__summary">
-          <div class="report-header-card__summary-label">입력 요약</div>
-          <div>{{ summaryLine }}</div>
-        </div>
-      </div>
-
-      <div class="report-section-title">핵심 추천 성분</div>
-
-      <article
-        v-for="ingredient in recommendedIngredients"
-        :key="ingredient.normalized_name || ingredient.name_ko || ingredient.name_en"
-        class="ingredient-card"
+      <ContentSection
+        title-id="report-header-title"
+        :title="report.title"
+        :eyebrow="formatDate(report.created_at)"
       >
-        <div class="ingredient-card__top">
+        <p>상태: {{ formatStatus(report.status) }}</p>
+      </ContentSection>
+
+      <ContentSection title-id="summary-title" title="사용자 입력 요약">
+        <dl class="summary-list">
           <div>
-            <div class="ingredient-card__name">{{ ingredient.name_ko || ingredient.name_en }}</div>
-            <div v-if="ingredient.name_en" class="ingredient-card__en">{{ ingredient.name_en }}</div>
+            <dt>나이</dt>
+            <dd>{{ report.input_summary?.age ?? '-' }}</dd>
           </div>
           <span class="badge badge--brand">{{ getBasisLabel(ingredient) }}</span>
         </div>
@@ -72,37 +64,95 @@
             <div class="ingredient-card__meta-label">기대 기능성</div>
             <div class="ingredient-card__meta-value">{{ formatList(ingredient.expected_effects) }}</div>
           </div>
-          <div v-if="ingredient.recommended_dosage">
-            <div class="ingredient-card__meta-label">권장 섭취</div>
-            <div class="ingredient-card__meta-value">{{ ingredient.recommended_dosage }}</div>
+          <div>
+            <dt>건강 목표</dt>
+            <dd>{{ formatList(report.input_summary?.health_goals) }}</dd>
           </div>
-        </div>
-        <div v-if="ingredient.precautions?.length" class="ingredient-card__caution">
-          <span class="ingredient-card__caution-tag">주의</span>
-          <span>{{ formatList(ingredient.precautions) }}</span>
-        </div>
-        <a v-if="ingredient.iherb_url" :href="ingredient.iherb_url" target="_blank" rel="noreferrer" class="ingredient-card__link">
-          성분 정보 외부 링크 <span class="ingredient-card__link-tag">iHerb ↗</span>
-        </a>
-      </article>
-
-      <div v-if="report.lifestyle_tips?.length" class="lifestyle-card">
-        <div class="lifestyle-card__title">생활 습관 팁</div>
-        <div class="lifestyle-card__list">
-          <div v-for="tip in report.lifestyle_tips" :key="tip" class="lifestyle-card__item">
-            <span class="lifestyle-card__dot">·</span>{{ tip }}
+          <div>
+            <dt>복용 약</dt>
+            <dd>{{ formatList(report.input_summary?.medications) }}</dd>
           </div>
-        </div>
-      </div>
+          <div>
+            <dt>특이사항</dt>
+            <dd>{{ formatList(report.input_summary?.special_conditions) }}</dd>
+          </div>
+          <div>
+            <dt>추가 입력</dt>
+            <dd>{{ report.input_summary?.additional_notes || '-' }}</dd>
+          </div>
+        </dl>
+      </ContentSection>
 
-      <div class="medical-disclaimer">
-        <b>의료 면책</b> · 본 리포트는 건강 정보 제공을 위한 것으로 의료 진단·처방을 대체하지 않습니다. 질환이 있거나 약을 복용 중인 경우 반드시 전문가와 상담하세요.
-      </div>
+      <ContentSection title-id="ingredient-title" title="추천 성분 상세">
+        <p v-if="recommendedIngredients.length === 0">추천 성분이 없습니다.</p>
+        <template v-else>
+          <article
+            v-for="ingredient in recommendedIngredients"
+            :key="ingredient.normalized_name || ingredient.name_ko || ingredient.name_en"
+            class="ingredient-card"
+          >
+            <h3>{{ ingredient.name_ko || ingredient.name_en }}</h3>
+            <p v-if="ingredient.name_en" class="ingredient-card__subtitle">{{ ingredient.name_en }}</p>
+            <p v-if="hasRecommendationScore(ingredient)" class="ingredient-card__score">
+              추천 적합도 {{ ingredient.recommendation_score }}% · {{ ingredient.score_label || getScoreLabel(ingredient.recommendation_score) }}
+            </p>
+            <dl class="summary-list">
+              <div v-if="ingredient.score_reasons?.length">
+                <dt>적합도 근거</dt>
+                <dd>{{ formatList(ingredient.score_reasons) }}</dd>
+              </div>
+              <div>
+                <dt>추천 이유</dt>
+                <dd>{{ ingredient.reason || '-' }}</dd>
+              </div>
+              <div>
+                <dt>기능성</dt>
+                <dd>{{ formatList(ingredient.expected_effects) }}</dd>
+              </div>
+              <div>
+                <dt>복용법 및 권장 용량</dt>
+                <dd>{{ ingredient.recommended_dosage || '-' }}</dd>
+              </div>
+              <div>
+                <dt>부작용 가능성</dt>
+                <dd>{{ formatList(ingredient.side_effects) }}</dd>
+              </div>
+              <div>
+                <dt>주의사항</dt>
+                <dd>{{ formatList(ingredient.precautions) }}</dd>
+              </div>
+              <div v-if="ingredient.iherb_url">
+                <dt>검증된 성분 링크</dt>
+                <dd>
+                  <a :href="ingredient.iherb_url" target="_blank" rel="noreferrer">
+                    성분 정보 보기
+                  </a>
+                </dd>
+              </div>
+            </dl>
+          </article>
+          <p class="ingredient-score-note">
+            추천 적합도는 사용자의 입력 조건, 근거 자료, 주의사항을 종합한 우선순위 점수이며, 효과 발생 확률이나 의학적 진단을 의미하지 않습니다.
+          </p>
+        </template>
+      </ContentSection>
 
-      <div class="report-actions">
-        <BaseButton @click="renameReport">제목 수정</BaseButton>
-        <BaseButton variant="danger" @click="deleteReport">삭제</BaseButton>
-      </div>
+      <ContentSection title-id="tips-title" title="생활 습관 관리 팁">
+        <ul v-if="report.lifestyle_tips?.length">
+          <li v-for="tip in report.lifestyle_tips" :key="tip">{{ tip }}</li>
+        </ul>
+        <p v-else>생활 습관 관리 팁이 없습니다.</p>
+      </ContentSection>
+
+      <ContentSection v-if="report.citations?.length" title-id="citations-title" title="근거 출처">
+        <ul>
+          <li v-for="citation in report.citations" :key="`${citation.source_type}-${citation.document_id}`">
+            {{ citation.source_name || citation.document_id }}
+          </li>
+        </ul>
+      </ContentSection>
+
+      <MedicalDisclaimer :message="report.disclaimer" />
     </template>
 
     <template #aside>
@@ -116,6 +166,7 @@
         :is-submitting="isChatSubmitting"
         :submit-disabled="isReportChatLimited"
         :error-message="chatError"
+        :suggested-questions="suggestedChatQuestions"
         @submit="sendChatMessage"
         @disabled-submit="showReportChatLimitToast"
       />
@@ -129,8 +180,10 @@ import { useRoute, useRouter } from 'vue-router'
 import { reportApi } from '../../../shared/api'
 import {
   BaseButton,
+  ContentSection,
   ErrorState,
   LoadingState,
+  MedicalDisclaimer,
   ReportChatPanel,
   ReportLayout,
 } from '../../../shared/components'
@@ -153,20 +206,21 @@ const chatError = ref('')
 
 const reportId = computed(() => route.params.report_id)
 const recommendedIngredients = computed(() => report.value?.recommended_ingredients ?? [])
-const topGoals = computed(() => {
-  const goals = report.value?.input_summary?.health_goals
-  return Array.isArray(goals) ? goals.slice(0, 2) : []
+const suggestedChatQuestions = computed(() => {
+  const firstIngredientName = getDisplayName(recommendedIngredients.value[0])
+  const primaryGoal = getDisplayName(report.value?.input_summary?.health_goals?.[0])
+
+  return [
+    firstIngredientName ? `${firstIngredientName}은 왜 추천됐나요?` : '',
+    primaryGoal ? `${primaryGoal}에 가장 중요한 성분은 무엇인가요?` : '',
+  ].filter(Boolean)
 })
-const summaryLine = computed(() => {
-  const s = report.value?.input_summary
-  if (!s) return ''
-  const parts = []
-  if (s.age) parts.push(`${s.age}세`)
-  if (s.gender) parts.push(formatGender(s.gender))
-  if (s.health_goals?.length) parts.push(`목표: ${s.health_goals.join(' · ')}`)
-  if (s.medications?.length) parts.push(`복용 약: ${s.medications.join(' · ')}`)
-  return parts.join(' · ')
-})
+
+function getDisplayName(value) {
+  if (!value) return ''
+  if (typeof value === 'string') return value
+  return value.name_ko || value.name || value.label || value.name_en || ''
+}
 
 onMounted(() => {
   loadReport()
@@ -311,142 +365,75 @@ function formatList(value) {
 }
 
 function formatGender(value) {
-  const labels = { female: '여성', male: '남성', other: '기타' }
-  return labels[value] ?? value ?? ''
+  const labels = {
+    female: '여성',
+    male: '남성',
+    other: '기타 또는 응답하지 않음',
+  }
+
+  return labels[value] ?? value ?? '-'
+}
+
+function formatStatus(status) {
+  const labels = {
+    completed: '생성 완료',
+    needs_clarification: '추가 확인 필요',
+    failed: '생성 실패',
+  }
+
+  return labels[status] ?? status ?? '상태 없음'
+}
+
+function hasRecommendationScore(ingredient) {
+  return Number.isFinite(Number(ingredient?.recommendation_score))
+}
+
+function getScoreLabel(score) {
+  const normalizedScore = Number(score)
+  if (normalizedScore >= 80) return '높음'
+  if (normalizedScore >= 60) return '보통'
+  if (normalizedScore >= 40) return '주의 필요'
+  return '낮음'
+}
+
+function formatDate(value) {
+  if (!value) return '생성일 없음'
+
+  return new Intl.DateTimeFormat('ko-KR', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  }).format(new Date(value))
 }
 </script>
 
 <style scoped>
-.report-back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: none;
-  background: none;
-  color: #6b736d;
-  font-size: 13px;
-  font-weight: 500;
-  text-decoration: none;
-  cursor: pointer;
-  padding: 0;
-}
-
-.report-back-link:hover {
-  color: #1a221e;
-  text-decoration: none;
-}
-
-.badge {
-  display: inline-block;
-  padding: 5px 10px;
-  border-radius: 7px;
-  font-size: 11.5px;
-  font-weight: 600;
-  line-height: 1;
-}
-
-.badge--blue {
-  background: #eaf1fa;
-  color: #2a5fa8;
-}
-
-.badge--brand {
-  background: var(--color-brand-50);
-  color: #1d5840;
-}
-
-/* Report header card */
-.report-header-card {
-  background: #fff;
-  border: 1px solid #e8ebe7;
-  border-radius: 14px;
-  padding: 26px 28px;
-}
-
-.report-header-card__badges {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-}
-
-.report-header-card h1 {
-  margin: 0 0 6px;
-  font-size: 27px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: #1a221e;
-  line-height: 1.25;
-}
-
-.report-header-card p {
-  margin: 0 0 18px;
-  font-size: 14px;
+p {
+  margin: 0;
+  color: #5b6b65;
   line-height: 1.6;
-  color: #6b736d;
 }
 
-.report-header-card__summary {
-  padding: 14px 16px;
-  background: #f7f8f6;
-  border-radius: 11px;
-  font-size: 13.5px;
-  line-height: 1.65;
-  color: #3a423d;
-}
-
-.report-header-card__summary-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #9aa19b;
-  margin-bottom: 8px;
-}
-
-/* Section title */
-.report-section-title {
-  font-size: 17px;
-  font-weight: 700;
-  color: #1a221e;
-  padding: 4px 2px;
-}
-
-/* Ingredient card */
-.ingredient-card {
-  background: #fff;
-  border: 1px solid #e8ebe7;
-  border-radius: 13px;
-  padding: 20px 22px;
-}
-
-.ingredient-card__top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+.summary-list {
+  display: grid;
   gap: 12px;
-  margin-bottom: 10px;
+  margin: 0;
 }
 
-.ingredient-card__name {
-  font-size: 18px;
-  font-weight: 700;
-  color: #1a221e;
-  line-height: 1.3;
+.summary-list div {
+  display: grid;
+  gap: 4px;
 }
 
-.ingredient-card__en {
-  font-size: 12.5px;
-  font-weight: 500;
-  color: #8b938c;
-  margin-top: 2px;
-  line-height: 1.4;
+.ingredient-card {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid #dde7e2;
+  border-radius: 8px;
 }
 
-.ingredient-card__reason {
-  margin: 0 0 14px;
-  font-size: 13.5px;
-  line-height: 1.65;
-  color: #3a423d;
+.ingredient-card + .ingredient-card {
+  margin-top: 14px;
 }
 
 .ingredient-card__score {
@@ -504,111 +491,44 @@ function formatGender(value) {
   margin-bottom: 12px;
 }
 
-.ingredient-card__meta-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: #9aa19b;
-  margin-bottom: 5px;
+.ingredient-card__subtitle {
+  color: #5b6b65;
 }
 
-.ingredient-card__meta-value {
-  font-size: 13px;
-  font-weight: 500;
-  color: #2d352f;
-  line-height: 1.5;
-}
-
-.ingredient-card__caution {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 11px 13px;
-  background: #fdf8ec;
-  border-radius: 9px;
-  margin-bottom: 12px;
-  font-size: 12.5px;
-  line-height: 1.55;
-  color: #6e5a2e;
-}
-
-.ingredient-card__caution-tag {
-  flex-shrink: 0;
-  font-size: 12px;
+.ingredient-card__score {
+  width: fit-content;
+  padding: 6px 10px;
+  border: 1px solid #b9d7ce;
+  border-radius: 999px;
+  background: #edf7f3;
+  color: #24614f;
+  font-size: 0.875rem;
   font-weight: 800;
-  color: #9a6512;
 }
 
-.ingredient-card__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--color-brand);
-  text-decoration: none;
+.ingredient-score-note {
+  margin-top: 14px;
+  font-size: 0.875rem;
 }
 
-.ingredient-card__link:hover {
-  text-decoration: underline;
+dt {
+  color: #5b6b65;
+  font-size: 0.875rem;
 }
 
-.ingredient-card__link-tag {
-  font-size: 11px;
-  font-family: ui-monospace, monospace;
-  color: #9aa19b;
+dd {
+  margin: 0;
+  color: #31443d;
 }
 
-/* Lifestyle card */
-.lifestyle-card {
-  background: #fff;
-  border: 1px solid #e8ebe7;
-  border-radius: 13px;
-  padding: 20px 22px;
-}
-
-.lifestyle-card__title {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1a221e;
-  margin-bottom: 12px;
-}
-
-.lifestyle-card__list {
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-}
-
-.lifestyle-card__item {
-  display: flex;
+ul {
+  display: grid;
   gap: 10px;
-  font-size: 13.5px;
-  line-height: 1.6;
-  color: #3a423d;
+  margin: 0;
+  padding-left: 20px;
+  color: #31443d;
 }
 
-.lifestyle-card__dot {
-  flex-shrink: 0;
-  color: var(--color-brand);
-  font-weight: 700;
-}
-
-/* Medical disclaimer */
-.medical-disclaimer {
-  padding: 16px 18px;
-  background: #fdf8ec;
-  border: 1px solid #f0e2c2;
-  border-radius: 12px;
-  font-size: 13px;
-  line-height: 1.65;
-  color: #6e5a2e;
-}
-
-.medical-disclaimer b {
-  color: #8a5b10;
-}
-
-/* Report actions */
 .report-actions {
   display: flex;
   flex-wrap: wrap;

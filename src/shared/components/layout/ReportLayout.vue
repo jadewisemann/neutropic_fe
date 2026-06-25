@@ -1,9 +1,9 @@
 <template>
   <AppLayout>
-    <section class="report-layout">
-      <div class="report-layout__top">
+    <section class="report-layout" aria-labelledby="report-layout-title">
+      <PageHeader class="report-layout__header" title-id="report-layout-title" eyebrow="추천 리포트" :title="title">
         <slot name="actions" />
-      </div>
+      </PageHeader>
       <div class="report-layout__content">
         <article class="report-layout__main">
           <slot />
@@ -18,6 +18,7 @@
 
 <script setup>
 import AppLayout from './AppLayout.vue'
+import PageHeader from './PageHeader.vue'
 
 defineProps({
   title: {
@@ -28,43 +29,22 @@ defineProps({
 </script>
 
 <style scoped>
-.report-layout {
-  max-width: 1160px;
-  margin: 0 auto;
-  padding: 28px 24px 56px;
-  animation: np-fade 0.3s ease both;
-}
-
-.report-layout__top {
-  margin-bottom: 16px;
-}
-
 .report-layout__content {
   display: grid;
-  grid-template-columns: 1.65fr 1fr;
-  gap: 20px;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: var(--space-6);
   align-items: start;
 }
 
-.report-layout__main {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  min-width: 0;
-}
-
+.report-layout__main,
 .report-layout__aside {
-  position: sticky;
-  top: 76px;
+  display: grid;
+  gap: var(--space-5);
 }
 
 @media (max-width: 920px) {
   .report-layout__content {
     grid-template-columns: 1fr;
-  }
-
-  .report-layout__aside {
-    position: static;
   }
 }
 </style>

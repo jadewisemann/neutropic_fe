@@ -2,10 +2,7 @@
   <div class="app-layout">
     <header class="app-layout__header">
       <div class="app-layout__header-inner">
-        <RouterLink class="app-layout__brand" to="/">
-          <span class="app-layout__brand-mark"><span></span></span>
-          <span>Neutripic</span>
-        </RouterLink>
+        <RouterLink class="app-layout__brand" to="/">Neutripic</RouterLink>
 
         <nav class="app-layout__nav" aria-label="주요 메뉴">
           <RouterLink to="/survey" class="app-layout__nav-link">추천 설문</RouterLink>
@@ -48,7 +45,6 @@
         </div>
 
         <div v-else class="app-layout__auth app-layout__auth--guest">
-          <RouterLink class="app-layout__admin-link" to="/admin">관리자</RouterLink>
           <RouterLink class="button button--sm" to="/login">로그인</RouterLink>
           <RouterLink class="button button--primary button--sm" to="/signup">회원가입</RouterLink>
         </div>
@@ -60,7 +56,7 @@
     </main>
 
     <footer class="app-layout__footer">
-      <p>Neutripic · 성분 중심 AI 리포트 · 본 서비스는 의료 진단·처방이 아닌 건강 정보를 제공합니다.</p>
+      <p>건강기능식품 성분 정보를 제공하며, 진단이나 처방을 대체하지 않습니다.</p>
     </footer>
   </div>
 </template>
@@ -162,7 +158,9 @@ function handleDocumentKeydown(event) {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #f7f8f6;
+  background:
+    radial-gradient(circle at top left, rgba(37, 111, 79, 0.08), transparent 320px),
+    var(--color-surface-muted);
   color: var(--color-text);
 }
 
@@ -172,17 +170,16 @@ function handleDocumentKeydown(event) {
   top: 0;
   z-index: 100;
   border-bottom: 1px solid var(--color-border);
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(247, 248, 246, 0.88);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .app-layout__header-inner {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
-  height: 60px;
-  min-height: 60px;
+  gap: var(--space-3);
+  min-height: 58px;
   max-width: var(--content-max-width);
   margin: 0 auto;
   padding: var(--space-2) var(--space-4);
@@ -190,32 +187,12 @@ function handleDocumentKeydown(event) {
 
 /* ---- Brand ---- */
 .app-layout__brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
   flex-shrink: 0;
   font-size: 16px;
   font-weight: 800;
   letter-spacing: 0;
   color: var(--color-text);
   text-decoration: none;
-}
-
-.app-layout__brand-mark {
-  display: inline-grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-  background: var(--color-brand);
-  box-shadow: inset 0 0 0 4px rgba(255, 255, 255, 0.18);
-}
-
-.app-layout__brand-mark span {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #ffffff;
 }
 
 .app-layout__brand:hover {
@@ -243,7 +220,7 @@ function handleDocumentKeydown(event) {
   align-items: center;
   min-height: 34px;
   padding: 0 var(--space-3);
-  border-radius: 8px;
+  border-radius: var(--radius-full);
   color: var(--color-text-soft);
   font-size: 13px;
   font-weight: 700;
@@ -258,9 +235,9 @@ function handleDocumentKeydown(event) {
 }
 
 .app-layout__nav-link.router-link-active {
-  background: var(--color-brand-50);
-  color: var(--color-brand-strong);
-  box-shadow: none;
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: inset 0 0 0 1px var(--color-border);
 }
 
 /* ---- Auth ---- */
@@ -391,17 +368,17 @@ function handleDocumentKeydown(event) {
 .app-layout__main {
   flex: 1;
   width: 100%;
-  max-width: none;
+  max-width: var(--content-max-width);
   margin: 0 auto;
-  padding: 0;
+  padding: var(--space-6) var(--space-4);
 }
 
 /* ---- Footer ---- */
 .app-layout__footer {
   border-top: 1px solid var(--color-border);
-  background: #ffffff;
-  padding: 20px 24px;
-  text-align: left;
+  background: rgba(255, 255, 255, 0.72);
+  padding: var(--space-5) var(--space-4);
+  text-align: center;
   color: var(--color-text-muted);
   font-size: 13px;
 }
@@ -414,18 +391,19 @@ function handleDocumentKeydown(event) {
     padding: 0 var(--space-6);
   }
 
+  .app-layout__main {
+    padding: var(--space-8) var(--space-6);
+  }
 }
 
-.app-layout__admin-link {
-  display: inline-flex;
-  align-items: center;
-  height: 34px;
-  padding: 0 11px;
-  border-radius: 8px;
-  color: #9aa19b;
-  font-size: 12.5px;
-  font-weight: 500;
-  text-decoration: none;
+@media (min-width: 1024px) {
+  .app-layout__header-inner {
+    padding: 0 var(--space-8);
+  }
+
+  .app-layout__main {
+    padding: var(--space-10) var(--space-8);
+  }
 }
 
 @media (max-width: 600px) {

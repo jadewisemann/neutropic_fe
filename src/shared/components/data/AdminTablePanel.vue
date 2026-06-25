@@ -35,27 +35,20 @@ const resolvedTitleId = computed(() => props.titleId || `${props.title.replace(/
 <style scoped>
 .admin-table-panel {
   overflow-x: auto;
-  padding: 0;
-  border: 1px solid #e8ebe7;
-  border-radius: 13px;
-  background: #ffffff;
 }
 
 .admin-table-panel__header {
-  padding: 16px 18px;
-  border-bottom: 1px solid #eef0ec;
-  margin-bottom: 0;
+  margin-bottom: var(--space-4);
 }
 
 .admin-table-panel__header h2 {
-  margin: 0 0 6px;
-  font-size: 18px;
+  margin: 0 0 var(--space-2);
+  font-size: 1.25rem;
 }
 
 .admin-table-panel__header p {
   margin: 0;
-  color: #6b736d;
-  font-size: 13.5px;
+  color: var(--color-text-muted);
 }
 
 .admin-table-panel__scroll {

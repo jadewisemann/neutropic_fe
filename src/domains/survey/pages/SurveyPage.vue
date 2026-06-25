@@ -1,6 +1,6 @@
 <template>
   <SurveyLayout>
-    <section v-if="isLoading" aria-labelledby="survey-loading-title">
+    <section v-if="isLoading" class="progress-panel" aria-labelledby="survey-progress-title">
       <LoadingState label="설문 선택지를 불러오는 중입니다" />
     </section>
 
@@ -15,28 +15,18 @@
     </ErrorState>
 
     <template v-else>
-      <!-- Progress strip -->
-      <div class="survey-progress" aria-label="설문 진행">
-        <div class="survey-progress__meta">
-          <span>{{ progressValue }} / {{ surveySteps.length }} 단계</span>
-          <span class="survey-progress__title" :id="`${currentStep.id}-title`">{{ currentStep.title }}</span>
+      <section class="progress-panel" aria-labelledby="survey-progress-title">
+        <div>
+          <p class="progress-panel__step">{{ progressValue }} / {{ surveySteps.length }}</p>
+          <h2 id="survey-progress-title">{{ currentStep.title }}</h2>
         </div>
-        <div
-          class="survey-progress__bar"
-          role="progressbar"
-          :aria-valuenow="progressValue"
-          :aria-valuemax="surveySteps.length"
-        >
-          <div
-            class="survey-progress__fill"
-            :style="{ width: `${(progressValue / surveySteps.length) * 100}%` }"
-          ></div>
-        </div>
-      </div>
+        <progress :max="surveySteps.length" :value="progressValue">
+          {{ progressValue }} / {{ surveySteps.length }}
+        </progress>
+      </section>
 
-      <!-- Step content -->
       <ContentSection
-        :title-id="`${currentStep.id}-section-title`"
+        :title-id="`${currentStep.id}-title`"
         :title="currentStep.title"
         :description="currentStep.description"
       >
@@ -88,7 +78,11 @@
             title="선택지가 없습니다"
             description="현재 단계에서 표시할 선택지가 없습니다."
           />
-          <div v-else class="chip-grid">
+          <div
+            v-else
+            class="chip-grid"
+            :class="{ 'chip-grid--health-goals': currentStep.id === 'health_goals' }"
+          >
             <label
               v-for="option in currentOptions"
               :key="option.code"
@@ -166,7 +160,7 @@
         <button v-if="!isLastStep" class="action-bar__next" :disabled="isSubmitting" @click="next">다음</button>
         <button v-else class="action-bar__next" :disabled="isSubmitting || isReportCreateLimited" @click="handleCreateReportRequest">
           {{ isSubmitting ? '리포트 생성 중' : '리포트 생성 요청' }}
-        </button>
+        </BaseButton>
       </div>
     </template>
   </SurveyLayout>
@@ -320,38 +314,60 @@ function getValidProfileDefaults(user) {
 </script>
 
 <style scoped>
-/* ---- Progress strip ---- */
-.survey-progress {
-  margin-bottom: 28px;
+.progress-panel,
+.action-bar {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: var(--shadow-raised);
 }
 
-.survey-progress__meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #5a625b;
+.progress-panel {
+  display: grid;
+  gap: var(--space-4);
 }
 
-.survey-progress__title {
-  color: var(--color-brand);
-  font-size: 12.5px;
+.progress-panel__step {
+  margin: 0 0 var(--space-1);
+  color: var(--color-brand-muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
 }
 
-.survey-progress__bar {
-  height: 5px;
-  border-radius: 99px;
-  background: #eef0ec;
-  overflow: hidden;
+.progress-panel h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0;
+  color: var(--color-text);
 }
 
-.survey-progress__fill {
-  height: 100%;
+.progress-panel progress {
+  width: 100%;
+  height: 4px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-gray-200);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.progress-panel progress::-webkit-progress-bar {
+  background: var(--color-gray-200);
+  border-radius: var(--radius-full);
+}
+
+.progress-panel progress::-webkit-progress-value {
   background: var(--color-brand);
-  border-radius: 99px;
-  transition: width 0.3s ease;
+  border-radius: var(--radius-full);
+  transition: width 300ms cubic-bezier(0.175, 0.885, 0.32, 1.1);
+}
+
+.progress-panel progress::-moz-progress-bar {
+  background: var(--color-brand);
+  border-radius: var(--radius-full);
 }
 
 /* ---- Chips ---- */
@@ -361,17 +377,20 @@ function getValidProfileDefaults(user) {
   gap: var(--space-2);
 }
 
+.chip-grid--health-goals {
+  gap: var(--space-3);
+}
+
 .chip-grid label {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  min-height: 44px;
+  min-height: 42px;
   padding: var(--space-2) var(--space-4);
-  border: 1.5px solid #e4e7e3;
-  border-radius: 10px;
-  color: #3a423d;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  color: var(--color-text-soft);
   font-size: 14px;
-  font-weight: 600;
   cursor: pointer;
   transition: border-color 150ms, background 150ms, color 150ms;
 }
@@ -379,6 +398,7 @@ function getValidProfileDefaults(user) {
 .chip-grid label:hover {
   border-color: var(--color-brand-muted);
   background: var(--color-gray-alpha-100);
+  color: var(--color-text);
 }
 
 .chip-grid input[type='checkbox'],
@@ -393,8 +413,9 @@ function getValidProfileDefaults(user) {
 
 .chip-grid__item--checked {
   border-color: var(--color-brand);
-  background: var(--color-brand-50);
-  color: var(--color-brand-strong);
+  background: var(--color-blue-100);
+  color: var(--color-text);
+  font-weight: 800;
 }
 
 .step-help {
@@ -436,8 +457,9 @@ textarea.form-control {
 /* ---- Action bar ---- */
 .action-bar {
   display: flex;
-  gap: 10px;
-  margin-top: 32px;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  justify-content: flex-end;
 }
 
 .action-bar__prev {

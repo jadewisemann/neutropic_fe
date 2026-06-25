@@ -9,7 +9,7 @@
         :description="loadError"
       >
         <template #action>
-          <div class="detail-row-actions">
+          <div class="post-detail__actions">
             <BaseButton size="sm" @click="loadPost">다시 시도</BaseButton>
             <BaseButton to="/community" size="sm">목록</BaseButton>
           </div>
@@ -23,53 +23,52 @@
 
         <button class="detail-back" type="button" @click="goBack">‹ 커뮤니티</button>
 
-        <section class="thread-section" aria-labelledby="post-title">
-          <!-- Main post item -->
-          <article class="thread-item thread-item--main">
-            <div class="thread-rail">
-              <span class="thread-avatar thread-avatar--lg">{{ getAuthorInitial(post.author) }}</span>
-              <span class="thread-line"></span>
-            </div>
-            <div class="thread-content">
-              <div class="thread-meta-row">
-                <div class="thread-meta">
-                  <strong class="thread-username">{{ formatAuthor(post.author) }}</strong>
-                  <span class="thread-time">{{ formatRelativeTime(post.created_at) }}</span>
-                </div>
-                <div v-if="canManagePost" class="thread-manage">
-                  <BaseButton size="sm" :to="`/community/${postId}/edit`">수정</BaseButton>
-                  <BaseButton size="sm" variant="danger" @click="deletePost">삭제</BaseButton>
+        <section class="thread" aria-labelledby="post-title">
+          <article class="main-thread-item">
+            <div class="thread2">
+              <div class="profile">
+                <div class="image" aria-hidden="true">{{ getAuthorInitial(post.author) }}</div>
+                <div class="frame-2" aria-hidden="true"></div>
+              </div>
+              <div class="frame-8">
+                <div class="name">
+                  <div class="frame-7">
+                    <div class="user-name">{{ formatAuthor(post.author) }}</div>
+                    <div class="_16-h">{{ formatRelativeTime(post.created_at) }}</div>
+                  </div>
+                  <div class="post-menu">
+                    <BaseButton v-if="canManagePost" size="sm" :to="`/community/${postId}/edit`">수정</BaseButton>
+                    <BaseButton v-if="canManagePost" size="sm" variant="danger" @click="deletePost">삭제</BaseButton>
+                  </div>
                 </div>
               </div>
-              <h1 id="post-title" class="sr-only">{{ post.title }}</h1>
-              <p class="thread-body">{{ post.content }}</p>
-              <div class="thread-reactions-row" aria-label="게시글 반응">
-                <button
-                  class="reaction-btn"
-                  type="button"
-                  :class="{ 'reaction-btn--liked': post.is_liked }"
-                  aria-label="추천"
-                  :disabled="isLikeSubmitting"
-                  @click="toggleLike"
-                >
+            </div>
+            <div class="message">
+              <div class="text">
+                <h1 id="post-title">{{ post.title }}</h1>
+                <p>{{ post.content }}</p>
+              </div>
+              <div class="actions">
+                <button class="thread-reactions" type="button" aria-label="추천" :disabled="isLikeSubmitting" @click="toggleLike">
                   <svg aria-hidden="true" viewBox="0 0 24 24" :class="{ 'is-filled': post.is_liked }">
                     <path d="M20.8 4.6c-1.9-1.8-4.9-1.8-6.8.1L12 6.7 10 4.7C8.1 2.8 5.1 2.8 3.2 4.6 1.1 6.7 1.1 10 3.1 12l8.2 8.1c.4.4 1 .4 1.4 0l8.2-8.1c2-2 2-5.3-.1-7.4Z" />
                   </svg>
-                  {{ post.like_count ?? 0 }}
+                  <span>{{ post.like_count ?? 0 }}</span>
                 </button>
-                <button class="reaction-btn" type="button" aria-label="댓글" @click="openRootComposer">
+                <button class="thread-reactions2" type="button" aria-label="댓글" @click="openRootComposer">
                   <svg aria-hidden="true" viewBox="0 0 24 24">
                     <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 1 1 21 11.5Z" />
                   </svg>
-                  {{ post.comment_count ?? 0 }}
+                  <span>{{ post.comment_count ?? 0 }}</span>
                 </button>
               </div>
-              <div class="thread-footer-row">
-                <span class="thread-footer-label">{{ (post.comment_count ?? comments.length) }}개 댓글</span>
-                <button class="thread-footer-btn" type="button" @click="openRootComposer">
-                  댓글 달기 <span aria-hidden="true">›</span>
-                </button>
-              </div>
+            </div>
+            <div class="reply">
+              <div class="replies">{{ post.comment_count ?? comments.length }} replies</div>
+              <button class="frame-10" type="button" @click="openRootComposer">
+                <span class="view-activity">Reply</span>
+                <span class="caret-right" aria-hidden="true">›</span>
+              </button>
             </div>
           </article>
 
@@ -93,103 +92,132 @@
 
           <template v-else>
             <template v-for="comment in comments" :key="comment.id">
-              <!-- Comment -->
-              <article class="thread-item thread-item--comment">
-                <div class="thread-rail">
-                  <span class="thread-avatar">{{ getAuthorInitial(comment.author) }}</span>
-                  <span v-if="comment.replies?.length || activeReplyId === comment.id" class="thread-line"></span>
+              <article class="reply-thread-item">
+                <div class="frame-14">
+                  <div class="profile2">
+                    <div class="image" aria-hidden="true">{{ getAuthorInitial(comment.author) }}</div>
+                    <div class="frame-22" aria-hidden="true"></div>
+                  </div>
+                  <div v-if="comment.replies?.length || activeReplyId === comment.id" class="frame-13" aria-hidden="true">
+                    <div class="rectangle-8"></div>
+                  </div>
                 </div>
-                <div class="thread-content">
-                  <div class="thread-meta-row">
-                    <div class="thread-meta">
-                      <strong class="thread-username">{{ formatAuthor(comment.author) }}</strong>
-                      <span class="thread-time">{{ formatRelativeTime(comment.created_at) }}</span>
+                <div class="frame-82">
+                  <div class="name">
+                    <div class="frame-7">
+                      <div class="user-name">{{ formatAuthor(comment.author) }}</div>
+                      <div class="_16-h">{{ formatRelativeTime(comment.created_at) }}</div>
                     </div>
                   </div>
-                  <p class="thread-body">{{ comment.content }}</p>
-                  <div class="thread-reactions-row">
-                    <button class="reaction-btn" type="button" aria-label="답글" @click="startReply(comment)">
-                      <svg aria-hidden="true" viewBox="0 0 24 24">
-                        <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 1 1 21 11.5Z" />
-                      </svg>
-                      답글
-                    </button>
-                    <template v-if="canManageComment(comment)">
-                      <button class="reaction-btn" type="button" @click="editComment(comment)">수정</button>
-                      <button class="reaction-btn reaction-btn--danger" type="button" @click="deleteComment(comment)">삭제</button>
-                    </template>
+                  <div class="message">
+                    <div class="text2">
+                      <p>{{ comment.content }}</p>
+                    </div>
+                    <div class="actions2">
+                      <button class="thread-reactions2" type="button" aria-label="답글" @click="startReply(comment)">
+                        <svg aria-hidden="true" viewBox="0 0 24 24">
+                          <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7A8.4 8.4 0 0 1 4 11.5 8.5 8.5 0 1 1 21 11.5Z" />
+                        </svg>
+                        <span>답글</span>
+                      </button>
+                      <button v-if="canManageComment(comment)" class="thread-reactions" type="button" @click="editComment(comment)">수정</button>
+                      <button
+                        v-if="canManageComment(comment)"
+                        class="thread-reactions thread-reactions--danger"
+                        type="button"
+                        @click="deleteComment(comment)"
+                      >
+                        삭제
+                      </button>
+                    </div>
                   </div>
 
                   <form
                     v-if="activeReplyId === comment.id"
-                    class="reply-form"
+                    class="expanded-reply-input"
                     aria-label="답글 작성"
                     @submit.prevent="createReply(comment)"
                   >
                     <textarea
                       v-model.trim="replyInput"
-                      class="reply-form__textarea"
                       rows="3"
                       :placeholder="`${formatAuthor(comment.author)}님에게 답글 달기`"
                       :disabled="isCommentSubmitting"
                     />
                     <FormErrorMessage :message="commentSubmitError" />
-                    <div class="reply-form__actions">
-                      <button class="reply-form__cancel-btn" type="button" @click="cancelReply">취소</button>
-                      <button class="reply-form__submit-btn" type="submit" :disabled="isCommentSubmitting">
+                    <div class="expanded-reply-input__actions">
+                      <BaseButton size="sm" type="button" @click="cancelReply">취소</BaseButton>
+                      <BaseButton size="sm" type="submit" :disabled="isCommentSubmitting">
                         {{ isCommentSubmitting ? '게시 중' : '답글 게시' }}
-                      </button>
+                      </BaseButton>
                     </div>
                   </form>
                 </div>
               </article>
 
-              <!-- Nested replies -->
               <article
                 v-for="reply in comment.replies"
                 :key="reply.id"
-                class="thread-item thread-item--reply"
+                class="reply-thread-item2"
               >
-                <div class="thread-rail thread-rail--indent">
-                  <span class="thread-avatar thread-avatar--sm">{{ getAuthorInitial(reply.author) }}</span>
+                <div class="frame-142">
+                  <div class="profile2">
+                    <div class="image" aria-hidden="true">{{ getAuthorInitial(reply.author) }}</div>
+                    <div class="frame-23" aria-hidden="true"></div>
+                  </div>
                 </div>
-                <div class="thread-content">
-                  <div class="thread-meta-row">
-                    <div class="thread-meta">
-                      <strong class="thread-username">{{ formatAuthor(reply.author) }}</strong>
-                      <span class="thread-time">{{ formatRelativeTime(reply.created_at) }}</span>
+                <div class="frame-82">
+                  <div class="name">
+                    <div class="frame-7">
+                      <div class="user-name">{{ formatAuthor(reply.author) }}</div>
+                      <div class="_16-h">{{ formatRelativeTime(reply.created_at) }}</div>
                     </div>
                   </div>
-                  <p class="thread-body">{{ reply.content }}</p>
-                  <div v-if="canManageComment(reply)" class="thread-reactions-row">
-                    <button class="reaction-btn" type="button" @click="editComment(reply)">수정</button>
-                    <button class="reaction-btn reaction-btn--danger" type="button" @click="deleteComment(reply)">삭제</button>
+                  <div class="message">
+                    <div class="text2">
+                      <p>{{ reply.content }}</p>
+                    </div>
+                    <div class="actions2">
+                      <button v-if="canManageComment(reply)" class="thread-reactions" type="button" @click="editComment(reply)">수정</button>
+                      <button
+                        v-if="canManageComment(reply)"
+                        class="thread-reactions thread-reactions--danger"
+                        type="button"
+                        @click="deleteComment(reply)"
+                      >
+                        삭제
+                      </button>
+                    </div>
                   </div>
                 </div>
               </article>
             </template>
           </template>
 
-          <!-- Root comment composer -->
-          <div v-if="!isCommentsLoading && !commentsError" class="root-composer">
-            <button v-if="!isRootComposerOpen" class="root-composer__trigger" type="button" @click="openRootComposer">
-              <span class="thread-avatar thread-avatar--sm">{{ getAuthorInitial(currentUser) }}</span>
-              <span class="root-composer__placeholder">{{ formatAuthor(post.author) }}에게 댓글 달기…</span>
+          <div v-if="!isCommentsLoading && !commentsError" class="reply-input">
+            <button v-if="!isRootComposerOpen" class="input" type="button" @click="openRootComposer">
+              <div class="frame-17">
+                <div class="frame-15">
+                  <div class="ellipse-3"></div>
+                  <div class="mask-group">{{ getAuthorInitial(currentUser) }}</div>
+                  <div class="ellipse-4"></div>
+                </div>
+              </div>
+              <span class="reply-to-babda">Reply to {{ formatAuthor(post.author) }}...</span>
             </button>
-            <form v-else class="reply-form reply-form--root" aria-label="댓글 작성" @submit.prevent="createRootComment">
+            <form v-else class="expanded-reply-input expanded-reply-input--root" aria-label="댓글 작성" @submit.prevent="createRootComment">
               <textarea
                 v-model.trim="rootCommentInput"
-                class="reply-form__textarea"
                 rows="3"
                 :placeholder="commentPlaceholder"
                 :disabled="isCommentSubmitting"
               />
               <FormErrorMessage :message="commentSubmitError" />
-              <div class="reply-form__actions">
-                <button class="reply-form__cancel-btn" type="button" @click="cancelRootComment">취소</button>
-                <button class="reply-form__submit-btn" type="submit" :disabled="isCommentSubmitting">
+              <div class="expanded-reply-input__actions">
+                <BaseButton size="sm" type="button" @click="cancelRootComment">취소</BaseButton>
+                <BaseButton size="sm" type="submit" :disabled="isCommentSubmitting">
                   {{ isCommentSubmitting ? '게시 중' : '게시' }}
-                </button>
+                </BaseButton>
               </div>
             </form>
           </div>
@@ -500,35 +528,34 @@ function formatRelativeTime(value) {
   if (!value) return ''
 
   const diffSeconds = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 1000))
-  if (diffSeconds < 60) return '방금'
+  if (diffSeconds < 60) return 'now'
 
   const units = [
-    { label: '년', seconds: 31536000 },
-    { label: '개월', seconds: 2592000 },
-    { label: '주', seconds: 604800 },
-    { label: '일', seconds: 86400 },
-    { label: '시간', seconds: 3600 },
-    { label: '분', seconds: 60 },
+    { label: 'y', seconds: 31536000 },
+    { label: 'mo', seconds: 2592000 },
+    { label: 'w', seconds: 604800 },
+    { label: 'd', seconds: 86400 },
+    { label: 'h', seconds: 3600 },
+    { label: 'm', seconds: 60 },
   ]
   const unit = units.find((item) => diffSeconds >= item.seconds)
-  return `${Math.floor(diffSeconds / unit.seconds)}${unit.label} 전`
+  return `${Math.floor(diffSeconds / unit.seconds)}${unit.label}`
 }
+
 </script>
 
 <style scoped>
 .post-detail {
   display: grid;
-  gap: 12px;
+  gap: var(--space-4);
   margin: 0 auto;
-  width: min(100%, 640px);
-  padding: 28px 20px 56px;
-  animation: np-fade 0.3s ease both;
+  width: min(100%, 680px);
 }
 
-.detail-row-actions {
+.post-detail__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .detail-back {
@@ -536,181 +563,26 @@ function formatRelativeTime(value) {
   padding: 0;
   border: 0;
   background: transparent;
-  color: #6b736d;
+  color: var(--color-text-muted);
   cursor: pointer;
   font: inherit;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
 }
 
 .detail-back:hover {
-  color: #1a221e;
+  color: var(--color-text);
 }
 
-.thread-section {
-  display: flex;
-  flex-direction: column;
-  border-top: 1px solid #eef0ec;
+.detail-back:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
-/* Thread item grid */
-.thread-item {
-  display: grid;
-  grid-template-columns: 52px minmax(0, 1fr);
-  gap: 12px;
-  padding: 18px 4px;
-  border-bottom: 1px solid #eef0ec;
-}
-
-.thread-item--reply {
-  padding-left: 16px;
-}
-
-/* Rail (avatar + line) */
-.thread-rail {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  min-height: 100%;
-}
-
-.thread-rail--indent {
-  padding-left: 8px;
-}
-
-.thread-avatar {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--color-brand-50);
-  color: var(--color-brand);
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.thread-avatar--lg {
-  width: 44px;
-  height: 44px;
-  font-size: 16px;
-}
-
-.thread-avatar--sm {
-  width: 36px;
-  height: 36px;
-  font-size: 13px;
-}
-
-.thread-line {
-  width: 2px;
-  flex: 1;
-  min-height: 8px;
-  background: #eef0ec;
-  border-radius: 99px;
-}
-
-/* Content */
-.thread-content {
-  min-width: 0;
-  display: grid;
-  gap: 8px;
-}
-
-.thread-meta-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.thread-meta {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  min-width: 0;
-}
-
-.thread-username {
-  font-size: 14.5px;
-  font-weight: 700;
-  color: #1a221e;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.thread-time {
-  flex-shrink: 0;
-  font-size: 12.5px;
-  color: #9aa19b;
-}
-
-.thread-manage {
-  display: flex;
-  flex-shrink: 0;
-  gap: 6px;
-}
-
-.thread-body {
-  margin: 0;
-  font-size: 14.5px;
-  line-height: 1.7;
-  color: #2d352f;
-  word-break: break-word;
-  white-space: pre-wrap;
-}
-
-.thread-reactions-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.reaction-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #9aa19b;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: color 150ms;
-}
-
-.reaction-btn:hover {
-  color: var(--color-brand);
-}
-
-.reaction-btn--liked,
-.reaction-btn--liked:hover {
-  color: #e04040;
-}
-
-.reaction-btn:disabled {
-  cursor: wait;
-  opacity: 0.55;
-}
-
-.reaction-btn--danger {
-  color: #c44444;
-}
-
-.reaction-btn--danger:hover {
-  color: #8f2f23;
-}
-
-.reaction-btn svg {
-  width: 18px;
-  height: 18px;
+.thread-reactions svg,
+.thread-reactions2 svg {
+  width: 20px;
+  height: 20px;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
@@ -718,157 +590,353 @@ function formatRelativeTime(value) {
   stroke-width: 2;
 }
 
-.reaction-btn svg.is-filled {
+.thread-reactions svg.is-filled {
   fill: currentColor;
   stroke: currentColor;
 }
 
-.thread-footer-row {
+.thread {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--color-border);
+  background: transparent;
+}
+
+.main-thread-item,
+.reply-thread-item,
+.reply-thread-item2,
+.reply-input {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  column-gap: var(--space-3);
+}
+
+.main-thread-item {
+  padding: var(--space-5) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.thread2 {
+  display: contents;
+}
+
+.profile,
+.frame-14,
+.frame-142,
+.frame-17 {
+  grid-column: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100%;
+}
+
+.profile2,
+.frame-15 {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.image,
+.mask-group {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-blue-200);
+  color: var(--color-blue-700);
+  font-size: 14px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.profile2 .image,
+.mask-group {
+  width: 36px;
+  height: 36px;
+  font-size: 13px;
+}
+
+.frame-2,
+.frame-13 {
+  display: flex;
+  justify-content: center;
+  flex: 1;
+  width: 100%;
+  min-height: 18px;
+  padding-top: var(--space-2);
+}
+
+.frame-2::before,
+.rectangle-8 {
+  display: block;
+  width: 1px;
+  height: 100%;
+  min-height: 18px;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  content: '';
+}
+
+.frame-8,
+.frame-82 {
+  grid-column: 2;
+  min-width: 0;
+}
+
+.name {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 2px;
+  gap: var(--space-3);
+  min-width: 0;
 }
 
-.thread-footer-label {
-  font-size: 12.5px;
-  color: #9aa19b;
-  font-weight: 500;
+.frame-7 {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
 }
 
-.thread-footer-btn {
+.user-name {
+  overflow: hidden;
+  color: var(--color-text-soft);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+._16-h {
+  flex: 0 0 auto;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.post-menu {
+  display: flex;
+  flex: 0 0 auto;
+  gap: var(--space-2);
+}
+
+.message {
+  grid-column: 2;
+  min-width: 0;
+}
+
+.text,
+.text2 {
+  min-width: 0;
+}
+
+.text h1 {
+  margin: var(--space-1) 0 var(--space-2);
+  color: var(--color-text);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+
+.text p,
+.text2 p {
+  margin: var(--space-1) 0 0;
+  color: var(--color-text-soft);
+  font-size: 15px;
+  line-height: 1.7;
+  word-break: break-word;
+}
+
+.actions,
+.actions2 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+
+.thread-reactions,
+.thread-reactions2,
+.frame-10 {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   padding: 0;
   border: 0;
   background: transparent;
-  color: #9aa19b;
-  font: inherit;
-  font-size: 12.5px;
-  font-weight: 600;
+  color: var(--color-text-muted);
   cursor: pointer;
-  transition: color 150ms;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
 }
 
-.thread-footer-btn:hover {
-  color: #1a221e;
+.thread-reactions:hover,
+.thread-reactions2:hover,
+.frame-10:hover {
+  color: var(--color-brand);
 }
 
-/* Reply form */
-.reply-form {
+.thread-reactions:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.thread-reactions--danger {
+  color: var(--color-danger-text);
+}
+
+.thread-reactions--danger:hover {
+  color: var(--color-danger-muted);
+}
+
+.reply {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.replies,
+.view-activity,
+.caret-right,
+.reply-to-babda {
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.reply-thread-item,
+.reply-thread-item2 {
+  padding-top: var(--space-5);
+}
+
+.reply-thread-item .message,
+.reply-thread-item2 .message {
+  margin-top: var(--space-1);
+}
+
+.reply-thread-item2 .frame-142 {
+  min-height: auto;
+}
+
+.expanded-reply-input {
   display: grid;
-  gap: 10px;
-  padding-top: 8px;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  padding: var(--space-3) 0 var(--space-1);
 }
 
-.reply-form--root {
+.expanded-reply-input--root {
+  grid-column: 1 / -1;
+  margin-top: 0;
   padding-top: 0;
 }
 
-.reply-form__textarea {
+.expanded-reply-input textarea {
   display: block;
   width: 100%;
-  min-height: 86px;
-  padding: 12px 14px;
-  border: 1.5px solid #e4e7e3;
-  border-radius: 10px;
-  background: #fff;
+  min-height: 92px;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
   font: inherit;
-  font-size: 14.5px;
+  font-size: 15px;
   line-height: 1.6;
-  color: #2d352f;
   resize: vertical;
+}
+
+.expanded-reply-input textarea:focus {
   outline: none;
-  transition: border-color 150ms, box-shadow 150ms;
-}
-
-.reply-form__textarea:focus {
   border-color: var(--color-brand);
-  box-shadow: 0 0 0 3px var(--color-brand-50);
+  box-shadow: var(--focus-ring);
 }
 
-.reply-form__actions {
+.expanded-reply-input__actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
-.reply-form__cancel-btn {
-  height: 38px;
-  padding: 0 14px;
-  border: 1.5px solid #d4dad4;
-  border-radius: 9px;
-  background: transparent;
-  color: #5a625b;
-  font: inherit;
-  font-size: 13.5px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: border-color 150ms;
-}
-
-.reply-form__cancel-btn:hover {
-  border-color: #a8b2a6;
-}
-
-.reply-form__submit-btn {
-  height: 38px;
-  padding: 0 16px;
-  border: none;
-  border-radius: 9px;
-  background: var(--color-brand);
-  color: #fff;
-  font: inherit;
-  font-size: 13.5px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 150ms;
-}
-
-.reply-form__submit-btn:hover:not(:disabled) {
-  background: var(--color-brand-strong);
-}
-
-.reply-form__submit-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Root comment trigger */
-.root-composer {
-  padding: 16px 4px;
-  border-top: 1px solid #eef0ec;
-}
-
-.root-composer__trigger {
-  display: grid;
-  grid-template-columns: 36px minmax(0, 1fr);
+.reply-input {
   align-items: center;
-  gap: 12px;
+  margin-top: var(--space-5);
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--color-border);
+}
+
+.reply-input .input {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  column-gap: var(--space-3);
+  align-items: center;
   width: 100%;
-  padding: 8px 4px;
+  padding: var(--space-2) 0;
   border: 0;
   background: transparent;
   cursor: pointer;
   text-align: left;
 }
 
-.root-composer__placeholder {
-  font: inherit;
-  font-size: 14px;
-  color: #9aa19b;
-  text-align: left;
+.reply-input .input:hover .reply-to-babda {
+  color: var(--color-text);
 }
 
-.root-composer__trigger:hover .root-composer__placeholder {
-  color: #1a221e;
+.ellipse-3,
+.ellipse-4 {
+  position: absolute;
+  right: -2px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--color-surface);
+  border-radius: var(--radius-full);
+  background: var(--color-brand);
+}
+
+.ellipse-3 {
+  top: 1px;
+}
+
+.ellipse-4 {
+  bottom: 1px;
 }
 
 .fallback-notice {
-  margin: 0;
-  padding: 10px 14px;
+  margin: 0 0 var(--space-3);
+  padding: var(--space-3) var(--space-4);
   border: 1px solid var(--color-warning-border);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--color-warning-surface);
   color: var(--color-warning-text);
   font-size: 13px;
+}
+
+@media (max-width: 560px) {
+  .main-thread-item,
+  .reply-thread-item,
+  .reply-thread-item2,
+  .reply-input .input {
+    grid-template-columns: 40px minmax(0, 1fr);
+    column-gap: var(--space-2);
+  }
+
+  .post-menu {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .text h1 {
+    font-size: 20px;
+  }
 }
 </style>

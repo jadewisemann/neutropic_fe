@@ -36,14 +36,14 @@ defineProps({
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-4);
-  padding-bottom: 0;
-  border-bottom: 0;
-  margin-bottom: 22px;
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-5);
 }
 
 .page-header__eyebrow {
   margin: 0 0 var(--space-2);
-  color: var(--color-brand);
+  color: var(--color-brand-muted);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0;
@@ -51,7 +51,7 @@ defineProps({
 
 .page-header h1 {
   margin: 0;
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 800;
   line-height: 1.28;
   letter-spacing: 0;
@@ -61,9 +61,9 @@ defineProps({
 .page-header__description {
   max-width: var(--content-measure);
   margin: var(--space-2) 0 0;
-  color: #6b736d;
-  font-size: 13.5px;
-  line-height: 1.5;
+  color: var(--color-text-soft);
+  font-size: 15px;
+  line-height: 1.6;
 }
 
 @media (max-width: 600px) {
@@ -75,11 +75,12 @@ defineProps({
 @media (min-width: 720px) {
   .page-header {
     gap: var(--space-5);
-    margin-bottom: 22px;
+    padding-bottom: var(--space-6);
+    margin-bottom: var(--space-6);
   }
 
   .page-header h1 {
-    font-size: 28px;
+    font-size: 34px;
   }
 }
 </style>

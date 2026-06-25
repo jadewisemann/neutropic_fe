@@ -67,17 +67,6 @@
   max-width: var(--content-measure);
 }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
 @media (min-width: 720px) {
   .u-panel {
     padding: var(--space-5);

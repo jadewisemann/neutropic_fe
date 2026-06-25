@@ -1,26 +1,28 @@
 <template>
   <AppLayout>
-    <LoadingState v-if="isLoading" label="게시글을 불러오는 중입니다" />
+    <section class="community-edit-page">
+      <LoadingState v-if="isLoading" label="게시글을 불러오는 중입니다" />
 
-    <ErrorState
-      v-else-if="loadError"
-      title="게시글을 불러오지 못했습니다"
-      :description="loadError"
-    >
-      <template #action>
-        <BaseButton size="sm" @click="loadPost">다시 시도</BaseButton>
-      </template>
-    </ErrorState>
+      <ErrorState
+        v-else-if="loadError"
+        title="게시글을 불러오지 못했습니다"
+        :description="loadError"
+      >
+        <template #action>
+          <BaseButton size="sm" @click="loadPost">다시 시도</BaseButton>
+        </template>
+      </ErrorState>
 
-    <CommunityFormPage
-      v-else
-      title="게시글 수정"
-      submit-label="수정 완료"
-      :initial-post="post"
-      :error-message="errorMessage"
-      :is-submitting="isSubmitting"
-      @submit="updatePost"
-    />
+      <CommunityFormPage
+        v-else
+        title="게시글 수정"
+        submit-label="수정 완료"
+        :initial-post="post"
+        :error-message="errorMessage"
+        :is-submitting="isSubmitting"
+        @submit="updatePost"
+      />
+    </section>
   </AppLayout>
 </template>
 
@@ -61,8 +63,8 @@ async function loadPost() {
 async function updatePost(payload) {
   errorMessage.value = ''
 
-  if (!payload.content) {
-    errorMessage.value = '내용을 입력해 주세요.'
+  if (!payload.title || !payload.content) {
+    errorMessage.value = '제목과 내용을 입력해 주세요.'
     return
   }
 
@@ -79,3 +81,9 @@ async function updatePost(payload) {
 }
 </script>
 
+<style scoped>
+.community-edit-page {
+  display: grid;
+  gap: 20px;
+}
+</style>

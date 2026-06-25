@@ -34,10 +34,11 @@ defineProps({
 .content-section {
   display: grid;
   gap: var(--space-4);
-  padding: 20px 22px;
-  border: 1px solid #e8ebe7;
-  border-radius: 13px;
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   background: var(--color-surface);
+  box-shadow: var(--shadow-raised);
 }
 
 .content-section__header {
@@ -47,21 +48,21 @@ defineProps({
 
 .content-section__eyebrow {
   margin: 0;
-  color: var(--color-brand);
-  font-size: 12px;
+  color: var(--color-brand-muted);
+  font-size: 13px;
   font-weight: 800;
 }
 
 .content-section__description {
   margin: 0;
-  color: #6b736d;
-  font-size: 13.5px;
-  line-height: 1.55;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 .content-section h2 {
   margin: 0;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 800;
   letter-spacing: 0;
   color: var(--color-text);
@@ -69,7 +70,7 @@ defineProps({
 
 @media (min-width: 720px) {
   .content-section {
-    padding: 22px 26px;
+    padding: var(--space-6);
   }
 }
 </style>
