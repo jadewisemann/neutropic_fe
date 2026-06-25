@@ -160,7 +160,7 @@
         <button v-if="!isLastStep" class="action-bar__next" :disabled="isSubmitting" @click="next">다음</button>
         <button v-else class="action-bar__next" :disabled="isSubmitting || isReportCreateLimited" @click="handleCreateReportRequest">
           {{ isSubmitting ? '리포트 생성 중' : '리포트 생성 요청' }}
-        </BaseButton>
+        </button>
       </div>
     </template>
   </SurveyLayout>

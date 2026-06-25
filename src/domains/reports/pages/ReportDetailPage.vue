@@ -38,31 +38,9 @@
             <dt>나이</dt>
             <dd>{{ report.input_summary?.age ?? '-' }}</dd>
           </div>
-          <span class="badge badge--brand">{{ getBasisLabel(ingredient) }}</span>
-        </div>
-        <p class="ingredient-card__reason">{{ ingredient.reason || '-' }}</p>
-        <div v-if="hasRecommendationScore(ingredient) || ingredient.score_reasons?.length" class="ingredient-card__score">
-          <div class="ingredient-card__score-head">
-            <span class="ingredient-card__meta-label">추천 점수</span>
-            <strong v-if="hasRecommendationScore(ingredient)" class="ingredient-card__score-value">
-              {{ formatRecommendationScore(ingredient.recommendation_score) }}점
-            </strong>
-            <span v-if="ingredient.score_label" class="ingredient-card__score-label">{{ ingredient.score_label }}</span>
-          </div>
-          <div v-if="ingredient.score_reasons?.length" class="ingredient-card__score-reasons">
-            <span
-              v-for="reason in ingredient.score_reasons"
-              :key="reason"
-              class="ingredient-card__score-reason"
-            >
-              {{ reason }}
-            </span>
-          </div>
-        </div>
-        <div class="ingredient-card__meta">
-          <div v-if="ingredient.expected_effects?.length">
-            <div class="ingredient-card__meta-label">기대 기능성</div>
-            <div class="ingredient-card__meta-value">{{ formatList(ingredient.expected_effects) }}</div>
+          <div>
+            <dt>성별</dt>
+            <dd>{{ formatGender(report.input_summary?.gender) }}</dd>
           </div>
           <div>
             <dt>건강 목표</dt>
@@ -344,16 +322,6 @@ function getLocalChatGuardrailMessage(content) {
   }
 
   return ''
-}
-
-function getBasisLabel(ingredient) {
-  const sources = ingredient.score_reasons ?? []
-  if (sources.some((s) => s?.toLowerCase?.().includes('idisk'))) return 'iDISK 근거'
-  return '기능성원료 인정'
-}
-
-function hasRecommendationScore(ingredient) {
-  return Number.isFinite(Number(ingredient.recommendation_score))
 }
 
 function formatRecommendationScore(score) {

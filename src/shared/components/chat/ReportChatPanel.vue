@@ -1,12 +1,13 @@
 <template>
-  <div class="chat-panel">
+  <section class="chat-panel report-chat-panel" :aria-labelledby="titleId">
     <header class="chat-panel__header">
-      <div class="chat-panel__title">{{ title }}</div>
+      <div :id="titleId" class="chat-panel__title">{{ title }}</div>
       <p class="chat-panel__desc">{{ description }}</p>
       <p v-if="limitNotice" class="chat-panel__limit">{{ limitNotice }}</p>
     </header>
 
-    <div v-else class="report-chat-panel__messages">
+    <p v-if="isLoading" class="report-chat-panel__status">채팅 내역을 불러오는 중입니다.</p>
+    <div v-else ref="messagesEl" class="chat-panel__messages report-chat-panel__messages">
       <div
         v-for="message in messages"
         :key="message.id ?? message.content ?? message.text"
@@ -25,19 +26,21 @@
       </div>
     </div>
 
-    <div class="chat-panel__input-row" @click.capture="handleDisabledSubmitAttempt">
-      <input
-        class="chat-panel__input"
-        type="text"
-        :value="modelValue"
-        :placeholder="placeholder"
-        :disabled="isSubmitting || submitDisabled"
-        @input="$emit('update:modelValue', $event.target.value)"
-      />
+    <form class="report-chat-panel__form" @submit.prevent="handleSubmit">
+      <div class="chat-panel__input-row" @click.capture="handleDisabledSubmitAttempt">
+        <input
+          class="chat-panel__input"
+          type="text"
+          :value="modelValue"
+          :placeholder="placeholder"
+          :disabled="isSubmitting || submitDisabled"
+          @input="$emit('update:modelValue', $event.target.value)"
+        />
+        <BaseButton variant="primary" type="submit" :disabled="isSubmitButtonDisabled">
+          {{ isSubmitting ? submittingLabel : submitLabel }}
+        </BaseButton>
+      </div>
       <p v-if="errorMessage" class="report-chat-panel__error" role="alert">{{ errorMessage }}</p>
-      <BaseButton variant="primary" type="submit" :disabled="isSubmitting || !modelValue.trim()">
-        {{ isSubmitting ? submittingLabel : submitLabel }}
-      </BaseButton>
     </form>
 
     <div v-if="suggestedQuestions.length" class="report-chat-panel__suggestions" aria-label="추천 질문">
@@ -46,17 +49,18 @@
         :key="question"
         class="report-chat-panel__suggestion"
         type="button"
-        :disabled="isSubmitButtonDisabled"
-        @click="handleSubmit"
+        :disabled="isSubmitting || submitDisabled"
+        @click="handleSuggestedQuestion(question)"
       >
         {{ question }}
       </button>
     </div>
-  </ContentSection>
+  </section>
 </template>
 
 <script setup>
 import { computed, nextTick, ref, watch } from 'vue'
+import { BaseButton } from '../base'
 
 const props = defineProps({
   title: {
@@ -139,10 +143,27 @@ function handleSubmit() {
   emit('submit', content)
 }
 
+function handleSuggestedQuestion(question) {
+  if (props.submitDisabled) {
+    emit('disabled-submit')
+    return
+  }
+  if (props.isSubmitting) return
+
+  emit('update:modelValue', question)
+  emit('submit', question)
+}
+
 function handleDisabledSubmitAttempt() {
   if (props.submitDisabled) {
     emit('disabled-submit')
   }
+}
+
+function formatGuardrail(result) {
+  if (!result) return ''
+  if (typeof result === 'string') return result
+  return result.message || result.reason || result.status || '확인됨'
 }
 </script>
 
