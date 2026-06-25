@@ -158,3 +158,12 @@ function joinUrl(baseUrl, endpoint) {
 
   return `${normalizedBaseUrl}${normalizedEndpoint}`
 }
+
+function normalizeApiBaseUrl(baseUrl) {
+  if (!baseUrl) return '/api/v1'
+
+  const normalizedBaseUrl = baseUrl.replace(/\/$/, '')
+  if (normalizedBaseUrl.endsWith('/api/v1')) return normalizedBaseUrl
+
+  return `${normalizedBaseUrl}/api/v1`
+}

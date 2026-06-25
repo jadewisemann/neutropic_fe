@@ -163,6 +163,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { authTokenStorage, userApi } from '../../../shared/api'
 import {
   BaseButton,
   ContentSection,
@@ -181,6 +182,7 @@ import { buildReportPayload } from '../mappers/surveyReportPayload'
 const router = useRouter()
 const {
   state,
+  currentStepId,
   currentStep,
   progressValue,
   isFirstStep,
@@ -203,6 +205,7 @@ const {
 const isSubmitting = ref(false)
 const submitError = ref('')
 const clarificationQuestions = ref([])
+const profileDefaultsApplied = ref(false)
 
 const currentOptions = computed(() => {
   return currentStep.value.options ?? optionGroups[currentStep.value.optionGroup] ?? []
@@ -210,6 +213,7 @@ const currentOptions = computed(() => {
 
 onMounted(() => {
   loadSurveyOptions()
+  initializeProfileDefaults()
 })
 
 async function handleCreateReportRequest() {
@@ -237,6 +241,48 @@ async function handleCreateReportRequest() {
 
 function storePendingReportPayload(payload) {
   window.sessionStorage.setItem('neutripic:pending_report_payload', JSON.stringify(payload))
+}
+
+async function initializeProfileDefaults() {
+  applyProfileDefaults(authTokenStorage.getUser())
+
+  if (!authTokenStorage.getAccessToken()) return
+
+  try {
+    const user = await userApi.getMe()
+    applyProfileDefaults(user)
+  } catch {
+    // 설문은 프로필 자동 입력 없이도 계속 진행할 수 있다.
+  }
+}
+
+function applyProfileDefaults(user) {
+  const profileDefaults = getValidProfileDefaults(user)
+
+  if (!profileDefaults) return false
+
+  if (!state.age) state.age = profileDefaults.age
+  if (!state.gender) state.gender = profileDefaults.gender
+
+  if (!profileDefaultsApplied.value && ['age', 'gender'].includes(currentStepId.value)) {
+    currentStepId.value = 'health_goals'
+    profileDefaultsApplied.value = true
+  }
+
+  return true
+}
+
+function getValidProfileDefaults(user) {
+  const age = Number(user?.age)
+  const gender = user?.gender
+  const ageStep = surveySteps.find((step) => step.id === 'age')
+  const genderStep = surveySteps.find((step) => step.id === 'gender')
+  const genderCodes = genderStep?.options?.map((option) => option.code) ?? []
+
+  if (!ageStep || !Number.isInteger(age) || age < ageStep.min || age > ageStep.max) return null
+  if (!genderCodes.includes(gender)) return null
+
+  return { age, gender }
 }
 </script>
 

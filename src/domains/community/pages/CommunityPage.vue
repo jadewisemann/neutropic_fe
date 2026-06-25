@@ -6,11 +6,47 @@
         eyebrow="커뮤니티"
         title="오늘의 건강 루틴 이야기"
         description="짧게 남기고, 이어서 묻고, 서로의 영양제 경험을 가볍게 확인해 보세요."
-      >
-        <template #actions>
-          <BaseButton to="/community/new" variant="primary">게시글 작성</BaseButton>
-        </template>
-      </PageHeader>
+      />
+
+      <section class="quick-composer" aria-label="커뮤니티 글쓰기">
+        <div class="quick-composer__rail" aria-hidden="true">
+          <span class="quick-composer__avatar">{{ currentUserInitial }}</span>
+        </div>
+        <div class="quick-composer__body">
+          <button
+            v-if="!isComposerOpen"
+            class="quick-composer__trigger"
+            type="button"
+            @click="openComposer"
+          >
+            건강 루틴이나 영양제 경험을 공유해 보세요.
+          </button>
+
+          <form v-else class="quick-composer__form" @submit.prevent="createPost">
+            <input
+              v-model.trim="composer.title"
+              class="quick-composer__title"
+              type="text"
+              placeholder="제목"
+              :disabled="isSubmittingPost"
+            />
+            <textarea
+              v-model.trim="composer.content"
+              class="quick-composer__content"
+              rows="4"
+              placeholder="건강 고민이나 영양제 경험을 공유하세요."
+              :disabled="isSubmittingPost"
+            />
+            <FormErrorMessage :message="composerError" />
+            <div class="quick-composer__actions">
+              <BaseButton size="sm" type="button" @click="cancelComposer">취소</BaseButton>
+              <BaseButton size="sm" variant="primary" type="submit" :disabled="isSubmittingPost">
+                {{ isSubmittingPost ? '게시 중' : '게시' }}
+              </BaseButton>
+            </div>
+          </form>
+        </div>
+      </section>
 
       <LoadingState v-if="isInitialLoading" label="게시글 목록을 불러오는 중입니다" />
 
@@ -30,7 +66,7 @@
         description="첫 번째 건강 고민이나 영양제 경험을 공유해 보세요."
       >
         <template #action>
-          <BaseButton to="/community/new">게시글 작성</BaseButton>
+          <BaseButton @click="openComposer">게시글 작성</BaseButton>
         </template>
       </EmptyState>
 
@@ -86,13 +122,27 @@
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router'
-import { communityApi } from '../../../shared/api'
-import { AppLayout, BaseButton, EmptyState, ErrorState, LoadingState, PageHeader } from '../../../shared/components'
+import { computed, reactive, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { authTokenStorage, communityApi } from '../../../shared/api'
+import { AppLayout, BaseButton, EmptyState, ErrorState, FormErrorMessage, LoadingState, PageHeader } from '../../../shared/components'
 import { useThreadFeed } from '../composables/useThreadFeed'
 import { dummyCommunityPosts } from '../data/dummyPosts'
 
 const route = useRoute()
+const router = useRouter()
+const isComposerOpen = ref(false)
+const isSubmittingPost = ref(false)
+const composerError = ref('')
+const composer = reactive({
+  title: '',
+  content: '',
+})
+const currentUser = computed(() => authTokenStorage.getUser())
+const currentUserInitial = computed(() => {
+  const username = currentUser.value?.username || currentUser.value?.email || 'U'
+  return username.trim().slice(0, 1).toUpperCase()
+})
 
 const {
   items: posts,
@@ -135,6 +185,50 @@ function truncateContent(value) {
   return normalized.length > 160 ? `${normalized.slice(0, 160)}...` : normalized
 }
 
+function openComposer() {
+  if (!authTokenStorage.getAccessToken()) {
+    router.push({
+      path: '/login',
+      query: { redirect_to: route.fullPath },
+    })
+    return
+  }
+
+  composerError.value = ''
+  isComposerOpen.value = true
+}
+
+function cancelComposer() {
+  composer.title = ''
+  composer.content = ''
+  composerError.value = ''
+  isComposerOpen.value = false
+}
+
+async function createPost() {
+  composerError.value = ''
+
+  if (!composer.title || !composer.content) {
+    composerError.value = '제목과 내용을 모두 입력해 주세요.'
+    return
+  }
+
+  isSubmittingPost.value = true
+
+  try {
+    await communityApi.createPost({
+      title: composer.title,
+      content: composer.content,
+    })
+    cancelComposer()
+    await loadInitialPosts()
+  } catch (error) {
+    composerError.value = error?.message || '게시글 작성에 실패했습니다.'
+  } finally {
+    isSubmittingPost.value = false
+  }
+}
+
 </script>
 
 <style scoped>
@@ -143,11 +237,101 @@ function truncateContent(value) {
   gap: var(--space-6);
 }
 
+.quick-composer {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: var(--space-4);
+  margin: 0 auto;
+  width: min(100%, 680px);
+  padding: var(--space-5) 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.quick-composer__rail {
+  display: grid;
+  justify-items: center;
+}
+
+.quick-composer__avatar {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-blue-200);
+  color: var(--color-blue-700);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.quick-composer__body,
+.quick-composer__form {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.quick-composer__trigger {
+  min-height: 40px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: text;
+  font: inherit;
+  font-size: 15px;
+  text-align: left;
+}
+
+.quick-composer__trigger:hover {
+  color: var(--color-text);
+}
+
+.quick-composer__title,
+.quick-composer__content {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+}
+
+.quick-composer__title {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.quick-composer__content {
+  min-height: 92px;
+  color: var(--color-text-soft);
+  font-size: 14px;
+  line-height: 1.6;
+  resize: vertical;
+}
+
+.quick-composer__title::placeholder,
+.quick-composer__content::placeholder {
+  color: var(--color-text-muted);
+}
+
+.quick-composer__title:focus,
+.quick-composer__content:focus {
+  outline: none;
+}
+
+.quick-composer__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
 .post-list {
   display: grid;
   margin: 0 auto;
   width: min(100%, 680px);
-  border-top: 1px solid var(--color-border);
 }
 
 .thread-post {
@@ -285,6 +469,7 @@ function truncateContent(value) {
 }
 
 @media (max-width: 600px) {
+  .quick-composer,
   .thread-post {
     grid-template-columns: 40px minmax(0, 1fr);
     gap: var(--space-3);
