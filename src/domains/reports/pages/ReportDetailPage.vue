@@ -49,6 +49,24 @@
           <span class="badge badge--brand">{{ getBasisLabel(ingredient) }}</span>
         </div>
         <p class="ingredient-card__reason">{{ ingredient.reason || '-' }}</p>
+        <div v-if="hasRecommendationScore(ingredient) || ingredient.score_reasons?.length" class="ingredient-card__score">
+          <div class="ingredient-card__score-head">
+            <span class="ingredient-card__meta-label">추천 점수</span>
+            <strong v-if="hasRecommendationScore(ingredient)" class="ingredient-card__score-value">
+              {{ formatRecommendationScore(ingredient.recommendation_score) }}점
+            </strong>
+            <span v-if="ingredient.score_label" class="ingredient-card__score-label">{{ ingredient.score_label }}</span>
+          </div>
+          <div v-if="ingredient.score_reasons?.length" class="ingredient-card__score-reasons">
+            <span
+              v-for="reason in ingredient.score_reasons"
+              :key="reason"
+              class="ingredient-card__score-reason"
+            >
+              {{ reason }}
+            </span>
+          </div>
+        </div>
         <div class="ingredient-card__meta">
           <div v-if="ingredient.expected_effects?.length">
             <div class="ingredient-card__meta-label">기대 기능성</div>
@@ -260,6 +278,14 @@ function getBasisLabel(ingredient) {
   return '기능성원료 인정'
 }
 
+function hasRecommendationScore(ingredient) {
+  return Number.isFinite(Number(ingredient.recommendation_score))
+}
+
+function formatRecommendationScore(score) {
+  return Math.round(Number(score))
+}
+
 function formatList(value) {
   return Array.isArray(value) && value.length > 0 ? value.join(', ') : '-'
 }
@@ -401,6 +427,52 @@ function formatGender(value) {
   font-size: 13.5px;
   line-height: 1.65;
   color: #3a423d;
+}
+
+.ingredient-card__score {
+  padding: 13px 0;
+  border-top: 1px solid #eef0ec;
+}
+
+.ingredient-card__score-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ingredient-card__score-value {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+  color: #1d5840;
+}
+
+.ingredient-card__score-label {
+  padding: 4px 8px;
+  border-radius: 7px;
+  background: #f1f6ef;
+  color: #3f674e;
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.ingredient-card__score-reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 9px;
+}
+
+.ingredient-card__score-reason {
+  padding: 6px 8px;
+  border-radius: 7px;
+  background: #f7f8f6;
+  color: #59635c;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.45;
 }
 
 .ingredient-card__meta {
