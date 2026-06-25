@@ -1,6 +1,6 @@
 <template>
   <SurveyLayout>
-    <section v-if="isLoading" class="progress-panel" aria-labelledby="survey-progress-title">
+    <section v-if="isLoading" aria-labelledby="survey-loading-title">
       <LoadingState label="설문 선택지를 불러오는 중입니다" />
     </section>
 
@@ -15,18 +15,28 @@
     </ErrorState>
 
     <template v-else>
-      <section class="progress-panel" aria-labelledby="survey-progress-title">
-        <div>
-          <p class="progress-panel__step">{{ progressValue }} / {{ surveySteps.length }}</p>
-          <h2 id="survey-progress-title">{{ currentStep.title }}</h2>
+      <!-- Progress strip -->
+      <div class="survey-progress" aria-label="설문 진행">
+        <div class="survey-progress__meta">
+          <span>{{ progressValue }} / {{ surveySteps.length }} 단계</span>
+          <span class="survey-progress__title" :id="`${currentStep.id}-title`">{{ currentStep.title }}</span>
         </div>
-        <progress :max="surveySteps.length" :value="progressValue">
-          {{ progressValue }} / {{ surveySteps.length }}
-        </progress>
-      </section>
+        <div
+          class="survey-progress__bar"
+          role="progressbar"
+          :aria-valuenow="progressValue"
+          :aria-valuemax="surveySteps.length"
+        >
+          <div
+            class="survey-progress__fill"
+            :style="{ width: `${(progressValue / surveySteps.length) * 100}%` }"
+          ></div>
+        </div>
+      </div>
 
+      <!-- Step content -->
       <ContentSection
-        :title-id="`${currentStep.id}-title`"
+        :title-id="`${currentStep.id}-section-title`"
         :title="currentStep.title"
         :description="currentStep.description"
       >
@@ -150,11 +160,11 @@
       <SafetyNotice />
 
       <div class="action-bar" aria-label="설문 이동">
-        <BaseButton :disabled="isFirstStep || isSubmitting" @click="previous">이전</BaseButton>
-        <BaseButton v-if="!isLastStep" variant="primary" :disabled="isSubmitting" @click="next">다음</BaseButton>
-        <BaseButton v-else variant="primary" :disabled="isSubmitting" @click="handleCreateReportRequest">
+        <button v-if="!isFirstStep" class="action-bar__prev" :disabled="isSubmitting" @click="previous">이전</button>
+        <button v-if="!isLastStep" class="action-bar__next" :disabled="isSubmitting" @click="next">다음</button>
+        <button v-else class="action-bar__next" :disabled="isSubmitting" @click="handleCreateReportRequest">
           {{ isSubmitting ? '리포트 생성 중' : '리포트 생성 요청' }}
-        </BaseButton>
+        </button>
       </div>
     </template>
   </SurveyLayout>
@@ -287,60 +297,38 @@ function getValidProfileDefaults(user) {
 </script>
 
 <style scoped>
-.progress-panel,
-.action-bar {
-  padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.82);
-  box-shadow: var(--shadow-raised);
+/* ---- Progress strip ---- */
+.survey-progress {
+  margin-bottom: 28px;
 }
 
-.progress-panel {
-  display: grid;
-  gap: var(--space-4);
+.survey-progress__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #5a625b;
 }
 
-.progress-panel__step {
-  margin: 0 0 var(--space-1);
-  color: var(--color-brand-muted);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0;
+.survey-progress__title {
+  color: var(--color-brand);
+  font-size: 12.5px;
 }
 
-.progress-panel h2 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: 0;
-  color: var(--color-text);
+.survey-progress__bar {
+  height: 5px;
+  border-radius: 99px;
+  background: #eef0ec;
+  overflow: hidden;
 }
 
-.progress-panel progress {
-  width: 100%;
-  height: 4px;
-  border: none;
-  border-radius: var(--radius-full);
-  background: var(--color-gray-200);
-  -webkit-appearance: none;
-  appearance: none;
-}
-
-.progress-panel progress::-webkit-progress-bar {
-  background: var(--color-gray-200);
-  border-radius: var(--radius-full);
-}
-
-.progress-panel progress::-webkit-progress-value {
+.survey-progress__fill {
+  height: 100%;
   background: var(--color-brand);
-  border-radius: var(--radius-full);
-  transition: width 300ms cubic-bezier(0.175, 0.885, 0.32, 1.1);
-}
-
-.progress-panel progress::-moz-progress-bar {
-  background: var(--color-brand);
-  border-radius: var(--radius-full);
+  border-radius: 99px;
+  transition: width 0.3s ease;
 }
 
 /* ---- Chips ---- */
@@ -354,12 +342,13 @@ function getValidProfileDefaults(user) {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  min-height: 42px;
+  min-height: 44px;
   padding: var(--space-2) var(--space-4);
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-full);
-  color: var(--color-text-soft);
+  border: 1.5px solid #e4e7e3;
+  border-radius: 10px;
+  color: #3a423d;
   font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
   transition: border-color 150ms, background 150ms, color 150ms;
 }
@@ -367,7 +356,6 @@ function getValidProfileDefaults(user) {
 .chip-grid label:hover {
   border-color: var(--color-brand-muted);
   background: var(--color-gray-alpha-100);
-  color: var(--color-text);
 }
 
 .chip-grid input[type='checkbox'],
@@ -382,9 +370,8 @@ function getValidProfileDefaults(user) {
 
 .chip-grid__item--checked {
   border-color: var(--color-brand);
-  background: var(--color-blue-100);
-  color: var(--color-text);
-  font-weight: 800;
+  background: var(--color-brand-50);
+  color: var(--color-brand-strong);
 }
 
 .step-help {
@@ -416,17 +403,57 @@ textarea.form-control {
   box-sizing: border-box;
 }
 
+/* ---- Action bar ---- */
 .action-bar {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 32px;
 }
 
-@media (min-width: 720px) {
-  .progress-panel,
-  .action-bar {
-    padding: var(--space-6);
-  }
+.action-bar__prev {
+  flex: none;
+  width: 80px;
+  height: 50px;
+  border: 1.5px solid #d4dad4;
+  border-radius: 11px;
+  background: #fff;
+  color: #5a625b;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 150ms;
+}
+
+.action-bar__prev:hover:not(:disabled) {
+  border-color: var(--color-brand);
+}
+
+.action-bar__prev:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-bar__next {
+  flex: 1;
+  height: 50px;
+  border: none;
+  border-radius: 11px;
+  background: var(--color-brand);
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 150ms;
+}
+
+.action-bar__next:hover:not(:disabled) {
+  background: var(--color-brand-strong);
+}
+
+.action-bar__next:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 </style>

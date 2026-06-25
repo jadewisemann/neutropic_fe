@@ -108,13 +108,14 @@ table {
 
 th,
 td {
-  padding: 12px;
-  border-top: 1px solid #edf2ef;
+  padding: 13px 18px;
+  border-top: 1px solid #eef0ec;
   text-align: left;
   vertical-align: top;
 }
 
 th {
+  background: #f7f8f6;
   color: #5b6b65;
   font-size: 0.875rem;
 }

@@ -1,42 +1,41 @@
 <template>
   <AuthLayout
     title="로그인"
-    eyebrow="다시 오신 것을 환영합니다"
-    description="추천 설문, 리포트 저장, 리포트 기반 채팅은 로그인 후 이용할 수 있습니다."
+    description="리포트와 추천 기록은 로그인 후 저장됩니다."
   >
-    <RedirectNotice />
-
-    <BaseForm aria-label="로그인 폼" @submit.prevent="handleSubmit">
-      <FormField label="아이디 또는 이메일">
+    <div class="auth-form">
+      <div class="auth-field">
+        <label class="auth-field__label">이메일</label>
         <input
           v-model.trim="form.login_id"
-          class="form-control"
+          class="auth-field__input"
           type="text"
           name="login_id"
           autocomplete="username"
-          placeholder="아이디 또는 이메일"
+          placeholder="hello@neutripic.app"
           :disabled="isSubmitting"
         />
-      </FormField>
-      <FormField label="비밀번호">
+      </div>
+      <div class="auth-field">
+        <label class="auth-field__label">비밀번호</label>
         <input
           v-model="form.password"
-          class="form-control"
+          class="auth-field__input"
           type="password"
           name="password"
           autocomplete="current-password"
-          placeholder="비밀번호"
+          placeholder="••••••••"
           :disabled="isSubmitting"
         />
-      </FormField>
+      </div>
       <FormErrorMessage :message="errorMessage" />
-      <BaseButton class="auth-submit" variant="primary" type="submit" :disabled="isSubmitting">
+      <button class="auth-submit" type="button" :disabled="isSubmitting" @click="handleSubmit">
         {{ isSubmitting ? '로그인 중' : '로그인' }}
-      </BaseButton>
-    </BaseForm>
+      </button>
+    </div>
 
     <p class="auth-link">
-      아직 계정이 없나요?
+      계정이 없으신가요?
       <RouterLink :to="signupLink">회원가입</RouterLink>
     </p>
   </AuthLayout>
@@ -46,15 +45,7 @@
 import { computed, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { authApi, authTokenStorage } from '../../../shared/api'
-import { AuthLayout, BaseButton, BaseForm, FormErrorMessage, FormField } from '../../../shared/components'
-
-const RedirectNotice = {
-  template: `
-    <p class="redirect-notice">
-      로그인 후 이전에 시도한 페이지로 돌아갈 수 있습니다.
-    </p>
-  `,
-}
+import { AuthLayout, FormErrorMessage } from '../../../shared/components'
 
 const route = useRoute()
 const router = useRouter()
@@ -82,7 +73,7 @@ async function handleSubmit() {
   errorMessage.value = ''
 
   if (!form.login_id || !form.password) {
-    errorMessage.value = '아이디 또는 이메일과 비밀번호를 입력해 주세요.'
+    errorMessage.value = '이메일과 비밀번호를 입력해 주세요.'
     return
   }
 
@@ -105,30 +96,84 @@ async function handleSubmit() {
 </script>
 
 <style scoped>
-.redirect-notice {
-  margin: 0 0 var(--space-5);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--color-blue-200);
-  border-radius: var(--radius-sm);
-  background: var(--color-blue-100);
-  color: var(--color-text-soft);
-  font-size: 14px;
-  line-height: 1.5;
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-field__label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #3a423d;
+  margin-bottom: 7px;
+  line-height: 1;
+}
+
+.auth-field__input {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  border: 1.5px solid #e4e7e3;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 150ms, box-shadow 150ms;
+  background: #fff;
+  color: #2d352f;
+}
+
+.auth-field__input::placeholder {
+  color: #9aa19b;
+}
+
+.auth-field__input:focus {
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px var(--color-brand-50);
 }
 
 .auth-submit {
   width: 100%;
+  height: 48px;
+  margin-top: 4px;
+  border: none;
+  border-radius: 10px;
+  background: var(--color-brand);
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 150ms;
+}
+
+.auth-submit:hover:not(:disabled) {
+  background: var(--color-brand-strong);
+}
+
+.auth-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .auth-link {
-  margin: var(--space-5) 0 0;
-  color: var(--color-text-muted);
-  font-size: 14px;
+  margin: 20px 0 0;
+  text-align: center;
+  color: #6b736d;
+  font-size: 13.5px;
 }
 
 .auth-link a {
   color: var(--color-brand);
-  font-weight: 500;
+  font-weight: 600;
+  text-decoration: none;
 }
 
 .auth-link a:hover {

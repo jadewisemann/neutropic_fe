@@ -1,16 +1,13 @@
 <template>
   <AppLayout>
-    <section class="reports-page" aria-labelledby="reports-title">
-      <PageHeader
-        title-id="reports-title"
-        eyebrow="추천 기록"
-        title="저장된 리포트"
-        description="생성일, 건강 목표, 주요 추천 성분을 기준으로 최근 리포트를 확인합니다."
-      >
-        <template #actions>
-          <BaseButton to="/survey" variant="primary">다시 설문하기</BaseButton>
-        </template>
-      </PageHeader>
+    <div class="reports-page">
+      <div class="reports-page__header">
+        <div>
+          <h1>추천 기록</h1>
+          <p>날짜 · 건강 목표 · 핵심 성분으로 정리됩니다.</p>
+        </div>
+        <RouterLink class="reports-page__new-btn" to="/survey">새 리포트</RouterLink>
+      </div>
 
       <LoadingState v-if="isLoading" label="리포트 목록을 불러오는 중입니다" />
 
@@ -35,27 +32,33 @@
       </EmptyState>
 
       <div v-else class="report-list">
-        <article v-for="report in reports" :key="report.id" class="report-list__item">
-          <div>
-            <p class="report-list__status">{{ formatStatus(report.status) }}</p>
-            <h2>{{ report.title }}</h2>
-            <p>{{ formatDate(report.created_at) }}</p>
+        <RouterLink
+          v-for="report in reports"
+          :key="report.id"
+          :to="`/reports/${report.id}`"
+          class="report-card"
+        >
+          <div class="report-card__body">
+            <div class="report-card__top">
+              <span class="report-card__title">{{ report.title }}</span>
+              <span class="report-card__date">{{ formatShortDate(report.created_at) }}</span>
+            </div>
+            <div class="report-card__tags">
+              <span class="report-card__tag report-card__tag--brand">{{ formatStatus(report.status) }}</span>
+              <span v-if="getGoalText(report)" class="report-card__tag report-card__tag--neutral">{{ getGoalText(report) }}</span>
+            </div>
           </div>
-          <div class="report-list__actions">
-            <BaseButton :to="`/reports/${report.id}`" size="sm" variant="primary">상세 보기</BaseButton>
-            <BaseButton size="sm" @click="renameReport(report)">제목 수정</BaseButton>
-            <BaseButton size="sm" variant="danger" @click="deleteReport(report)">삭제</BaseButton>
-          </div>
-        </article>
+          <span class="report-card__arrow">›</span>
+        </RouterLink>
       </div>
-    </section>
+    </div>
   </AppLayout>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
 import { reportApi } from '../../../shared/api'
-import { AppLayout, BaseButton, EmptyState, ErrorState, LoadingState, PageHeader } from '../../../shared/components'
+import { AppLayout, BaseButton, EmptyState, ErrorState, LoadingState } from '../../../shared/components'
 
 const reports = ref([])
 const isLoading = ref(true)
@@ -79,33 +82,6 @@ async function loadReports() {
   }
 }
 
-async function renameReport(report) {
-  const title = window.prompt('새 리포트 제목을 입력해 주세요.', report.title)
-  const normalizedTitle = title?.trim()
-
-  if (!normalizedTitle || normalizedTitle === report.title) return
-
-  try {
-    const updatedReport = await reportApi.update(report.id, { title: normalizedTitle })
-    reports.value = reports.value.map((item) => (
-      item.id === report.id ? { ...item, title: updatedReport?.title ?? normalizedTitle } : item
-    ))
-  } catch (error) {
-    window.alert(error?.message || '제목 수정에 실패했습니다.')
-  }
-}
-
-async function deleteReport(report) {
-  if (!window.confirm(`'${report.title}' 리포트를 삭제할까요?`)) return
-
-  try {
-    await reportApi.delete(report.id)
-    reports.value = reports.value.filter((item) => item.id !== report.id)
-  } catch (error) {
-    window.alert(error?.message || '리포트 삭제에 실패했습니다.')
-  }
-}
-
 function formatStatus(status) {
   const labels = {
     completed: '생성 완료',
@@ -116,90 +92,156 @@ function formatStatus(status) {
   return labels[status] ?? status ?? '상태 없음'
 }
 
-function formatDate(value) {
-  if (!value) return '생성일 없음'
+function getGoalText(report) {
+  const goals = report.input_summary?.health_goals
+  if (Array.isArray(goals) && goals.length > 0) {
+    return goals.slice(0, 2).join(' · ') + (goals.length > 2 ? ' 외' : '')
+  }
+  return ''
+}
 
-  return new Intl.DateTimeFormat('ko-KR', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  }).format(new Date(value))
+function formatShortDate(value) {
+  if (!value) return ''
+
+  const date = new Date(value)
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${month}.${day}`
 }
 </script>
 
 <style scoped>
 .reports-page {
-  display: grid;
-  gap: var(--space-6);
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 36px 24px 56px;
+  animation: np-fade 0.3s ease both;
+}
+
+.reports-page__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.reports-page__header h1 {
+  margin: 0 0 5px;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #1a221e;
+}
+
+.reports-page__header p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #6b736d;
+}
+
+.reports-page__new-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 10px;
+  background: var(--color-brand);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 150ms;
+}
+
+.reports-page__new-btn:hover {
+  background: var(--color-brand-strong);
+  text-decoration: none;
 }
 
 .report-list {
-  display: grid;
-  gap: var(--space-3);
-}
-
-.report-list__item {
   display: flex;
-  justify-content: space-between;
-  gap: var(--space-4);
-  padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.82);
-  box-shadow: var(--shadow-raised);
-  transition: box-shadow 200ms;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.report-list__item:hover {
-  box-shadow: var(--shadow-popover);
+.report-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  background: #fff;
+  border: 1px solid #e8ebe7;
+  border-radius: 13px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 150ms;
 }
 
-.report-list__item h2,
-.report-list__item p {
-  margin: 0;
+.report-card:hover {
+  border-color: #cfd6cf;
+  text-decoration: none;
 }
 
-.report-list__item h2 {
-  margin: var(--space-1) 0 var(--space-2);
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: 0;
-  color: var(--color-text);
+.report-card__body {
+  flex: 1;
+  min-width: 0;
 }
 
-.report-list__item p {
-  color: var(--color-text-muted);
-  font-size: 13px;
+.report-card__top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 9px;
 }
 
-.report-list__status {
-  display: inline-block;
+.report-card__title {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #1a221e;
+}
+
+.report-card__date {
+  flex-shrink: 0;
   font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0;
-  color: var(--color-brand-muted);
+  font-family: ui-monospace, monospace;
+  color: #9aa19b;
 }
 
-.report-list__actions {
+.report-card__tags {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
-  align-items: center;
-  justify-content: flex-end;
+  gap: 6px;
 }
 
-@media (max-width: 720px) {
-  .report-list__item {
-    flex-direction: column;
-  }
-
-  .report-list__actions {
-    justify-content: flex-start;
-  }
+.report-card__tag {
+  padding: 4px 9px;
+  border-radius: 7px;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1;
 }
 
-@media (min-width: 720px) {
-  .report-list__item {
-    padding: var(--space-5) var(--space-6);
-  }
+.report-card__tag--brand {
+  background: var(--color-brand-50);
+  color: #1d5840;
+}
+
+.report-card__tag--neutral {
+  background: #f2f4f1;
+  color: #5a625b;
+  font-weight: 500;
+}
+
+.report-card__arrow {
+  flex-shrink: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #c2c8c1;
 }
 </style>

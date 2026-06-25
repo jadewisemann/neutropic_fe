@@ -1,58 +1,62 @@
 <template>
   <AuthLayout
     title="회원가입"
-    eyebrow="리포트 저장을 위한 계정 생성"
-    description="기본 정보는 성분 추천 조건과 추천 기록 관리에 사용됩니다."
+    description="건강 정보는 리포트 생성에만 사용되며 안전하게 보관됩니다."
   >
-    <BaseForm aria-label="회원가입 폼" @submit.prevent="handleSubmit">
-      <FormField label="이메일">
-        <input
-          v-model.trim="form.email"
-          class="form-control"
-          type="email"
-          name="email"
-          autocomplete="email"
-          placeholder="이메일"
-          :disabled="isSubmitting"
-        />
-      </FormField>
-      <FormField label="사용자 이름">
+    <div class="auth-form">
+      <div class="auth-field">
+        <label class="auth-field__label">닉네임</label>
         <input
           v-model.trim="form.username"
-          class="form-control"
+          class="auth-field__input"
           type="text"
           name="username"
           autocomplete="username"
-          placeholder="사용자 이름"
+          placeholder="건강한하루"
           :disabled="isSubmitting"
         />
-      </FormField>
-      <FormField label="비밀번호">
+      </div>
+      <div class="auth-field">
+        <label class="auth-field__label">이메일</label>
+        <input
+          v-model.trim="form.email"
+          class="auth-field__input"
+          type="email"
+          name="email"
+          autocomplete="email"
+          placeholder="hello@neutripic.app"
+          :disabled="isSubmitting"
+        />
+      </div>
+      <div class="auth-field">
+        <label class="auth-field__label">비밀번호</label>
         <input
           v-model="form.password"
-          class="form-control"
+          class="auth-field__input"
           type="password"
           name="password"
           autocomplete="new-password"
-          placeholder="비밀번호"
+          placeholder="8자 이상"
           :disabled="isSubmitting"
         />
-      </FormField>
-      <FormField label="비밀번호 확인">
+      </div>
+      <div class="auth-field">
+        <label class="auth-field__label">비밀번호 확인</label>
         <input
           v-model="form.passwordConfirm"
-          class="form-control"
+          class="auth-field__input"
           type="password"
           name="password_confirm"
           autocomplete="new-password"
           placeholder="비밀번호 확인"
           :disabled="isSubmitting"
         />
-      </FormField>
-      <FormField label="나이">
+      </div>
+      <div class="auth-field">
+        <label class="auth-field__label">나이</label>
         <input
           v-model.number="form.age"
-          class="form-control"
+          class="auth-field__input"
           type="number"
           name="age"
           min="14"
@@ -60,20 +64,25 @@
           placeholder="나이"
           :disabled="isSubmitting"
         />
-      </FormField>
-      <FormField label="성별">
-        <select v-model="form.gender" class="form-control" name="gender" :disabled="isSubmitting">
+      </div>
+      <div class="auth-field">
+        <label class="auth-field__label">성별</label>
+        <select v-model="form.gender" class="auth-field__input auth-field__select" name="gender" :disabled="isSubmitting">
           <option value="">선택</option>
           <option value="female">여성</option>
           <option value="male">남성</option>
           <option value="other">기타 또는 응답하지 않음</option>
         </select>
-      </FormField>
+      </div>
+      <label class="auth-agree">
+        <input v-model="agreed" type="checkbox" />
+        건강 정보 처리 및 서비스 이용약관에 동의합니다.
+      </label>
       <FormErrorMessage :message="errorMessage" />
-      <BaseButton class="auth-submit" variant="primary" type="submit" :disabled="isSubmitting">
-        {{ isSubmitting ? '가입 중' : '회원가입' }}
-      </BaseButton>
-    </BaseForm>
+      <button class="auth-submit" type="button" :disabled="isSubmitting" @click="handleSubmit">
+        {{ isSubmitting ? '가입 중' : '가입하고 시작하기' }}
+      </button>
+    </div>
 
     <p class="auth-link">
       이미 계정이 있나요?
@@ -86,7 +95,7 @@
 import { computed, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { authApi } from '../../../shared/api'
-import { AuthLayout, BaseButton, BaseForm, FormErrorMessage, FormField } from '../../../shared/components'
+import { AuthLayout, FormErrorMessage } from '../../../shared/components'
 
 const route = useRoute()
 const router = useRouter()
@@ -98,6 +107,7 @@ const form = reactive({
   age: '',
   gender: '',
 })
+const agreed = ref(false)
 const errorMessage = ref('')
 const isSubmitting = ref(false)
 const redirectTo = computed(() => {
@@ -127,6 +137,11 @@ async function handleSubmit() {
     return
   }
 
+  if (!agreed.value) {
+    errorMessage.value = '이용약관에 동의해 주세요.'
+    return
+  }
+
   isSubmitting.value = true
 
   try {
@@ -151,19 +166,107 @@ async function handleSubmit() {
 </script>
 
 <style scoped>
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-field__label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #3a423d;
+  margin-bottom: 7px;
+  line-height: 1;
+}
+
+.auth-field__input {
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  border: 1.5px solid #e4e7e3;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 15px;
+  outline: none;
+  background: #fff;
+  color: #2d352f;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+
+.auth-field__input::placeholder {
+  color: #9aa19b;
+}
+
+.auth-field__input:focus {
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px var(--color-brand-50);
+}
+
+.auth-field__select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238f8f8f' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+
+.auth-agree {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: #6b736d;
+  cursor: pointer;
+}
+
+.auth-agree input {
+  margin-top: 2px;
+  accent-color: var(--color-brand);
+  flex-shrink: 0;
+}
+
 .auth-submit {
   width: 100%;
+  height: 48px;
+  border: none;
+  border-radius: 10px;
+  background: var(--color-brand);
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 150ms;
+}
+
+.auth-submit:hover:not(:disabled) {
+  background: var(--color-brand-strong);
+}
+
+.auth-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .auth-link {
-  margin: var(--space-5) 0 0;
-  color: var(--color-text-muted);
-  font-size: 14px;
+  margin: 20px 0 0;
+  text-align: center;
+  color: #6b736d;
+  font-size: 13.5px;
 }
 
 .auth-link a {
   color: var(--color-brand);
-  font-weight: 500;
+  font-weight: 600;
+  text-decoration: none;
 }
 
 .auth-link a:hover {

@@ -33,21 +33,23 @@ defineProps({
   display: grid;
   gap: var(--space-5);
   align-items: start;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 36px 24px 56px;
 }
 
 .mypage-layout__side {
   display: grid;
   gap: var(--space-3);
-  padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.82);
-  box-shadow: var(--shadow-raised);
+  padding: 18px;
+  border: 1px solid #e8ebe7;
+  border-radius: 11px;
+  background: #ffffff;
 }
 
 .mypage-layout__eyebrow {
   margin: 0;
-  color: var(--color-brand-muted);
+  color: var(--color-brand);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0;
@@ -77,7 +79,7 @@ defineProps({
   align-items: center;
   min-height: 34px;
   padding: 0 var(--space-3);
-  border-radius: var(--radius-full);
+  border-radius: 8px;
   color: var(--color-text-soft);
   font-size: 13px;
   font-weight: 700;
@@ -93,9 +95,9 @@ defineProps({
 }
 
 .mypage-layout__nav-link.router-link-active {
-  background: var(--color-surface);
-  color: var(--color-text);
-  box-shadow: inset 0 0 0 1px var(--color-border);
+  background: var(--color-brand-50);
+  color: var(--color-brand-strong);
+  box-shadow: none;
 }
 
 .mypage-layout__content {

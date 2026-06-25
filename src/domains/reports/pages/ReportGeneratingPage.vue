@@ -1,13 +1,6 @@
 <template>
   <AppLayout>
-    <section class="generation-page" aria-labelledby="generation-title">
-      <PageHeader
-        title-id="generation-title"
-        eyebrow="리포트 생성"
-        title="맞춤 성분 리포트를 생성하고 있습니다"
-        description="입력 검증부터 RAG 근거 확인까지 순서대로 처리합니다."
-      />
-
+    <div class="generation-page">
       <ErrorState
         v-if="!pendingPayload && !isGenerating"
         title="진행 중인 생성 요청이 없습니다"
@@ -18,59 +11,85 @@
         </template>
       </ErrorState>
 
-      <ContentSection
-        v-else
-        title-id="generation-progress-title"
-        title="생성 진행 상태"
-        :description="currentStepDescription"
-      >
-        <ol class="step-list">
-          <li
+      <template v-else>
+        <!-- Header -->
+        <div class="generation-header">
+          <span class="generation-spinner" aria-hidden="true"></span>
+          <div>
+            <h2>리포트를 만들고 있어요</h2>
+            <p>가짜 진행률 대신 실제 단계를 보여줘요. 잠시만 기다려 주세요.</p>
+          </div>
+        </div>
+
+        <!-- Steps -->
+        <div class="step-panel">
+          <div
             v-for="(step, index) in generationSteps"
             :key="step.id"
-            class="step-list__item"
-            :class="{
-              'step-list__item--done': index < activeStepIndex,
-              'step-list__item--active': index === activeStepIndex && isGenerating,
-              'step-list__item--failed': hasFailed && index === activeStepIndex,
-            }"
+            class="step-item"
           >
-            <span class="step-list__marker">{{ getStepMarker(index) }}</span>
-            <span>{{ step.label }}</span>
-          </li>
-        </ol>
-      </ContentSection>
+            <div class="step-item__rail">
+              <span
+                class="step-item__marker"
+                :class="{
+                  'step-item__marker--done': index < activeStepIndex,
+                  'step-item__marker--active': index === activeStepIndex && isGenerating,
+                  'step-item__marker--failed': hasFailed && index === activeStepIndex,
+                }"
+              >{{ getStepMarker(index) }}</span>
+              <span
+                v-if="index < generationSteps.length - 1"
+                class="step-item__line"
+                :class="{
+                  'step-item__line--done': index < activeStepIndex,
+                  'step-item__line--active': index <= activeStepIndex && isGenerating,
+                }"
+              ></span>
+            </div>
+            <div class="step-item__content">
+              <div
+                class="step-item__label"
+                :class="{
+                  'step-item__label--done': index < activeStepIndex,
+                  'step-item__label--active': index === activeStepIndex && isGenerating,
+                  'step-item__label--failed': hasFailed && index === activeStepIndex,
+                }"
+              >{{ step.label }}</div>
+              <div
+                v-if="index === activeStepIndex && isGenerating && !hasFailed"
+                class="step-item__progress"
+              >진행 중…</div>
+            </div>
+          </div>
+        </div>
 
-      <ErrorState
-        v-if="clarificationQuestions.length > 0"
-        title="추가 확인이 필요합니다"
-        description="아래 내용을 보완한 뒤 다시 요청해 주세요."
-      >
+        <div class="generation-footer">
+          <RouterLink class="generation-back" to="/survey">설문 수정하기</RouterLink>
+        </div>
+      </template>
+
+      <div v-if="clarificationQuestions.length > 0" class="clarification-notice">
+        <div class="clarification-notice__title">추가 확인이 필요합니다</div>
+        <p>아래 내용을 보완한 뒤 다시 요청해 주세요.</p>
         <ul class="question-list">
           <li v-for="question in clarificationQuestions" :key="question.code ?? question.message">
             {{ question.message }}
           </li>
         </ul>
-        <template #action>
-          <BaseButton to="/survey" size="sm">설문 수정</BaseButton>
-        </template>
-      </ErrorState>
+        <RouterLink class="action-link" to="/survey">설문 수정</RouterLink>
+      </div>
 
-      <ErrorState
-        v-else-if="createError"
-        title="리포트 생성에 실패했습니다"
-        :description="createError"
-      >
-        <template #action>
-          <div class="error-actions">
-            <BaseButton size="sm" @click="startGeneration">다시 시도</BaseButton>
-            <BaseButton to="/survey" size="sm">설문 수정</BaseButton>
-          </div>
-        </template>
-      </ErrorState>
+      <div v-else-if="createError" class="error-notice">
+        <div class="error-notice__title">리포트 생성에 실패했습니다</div>
+        <p>{{ createError }}</p>
+        <div class="error-actions">
+          <BaseButton size="sm" @click="startGeneration">다시 시도</BaseButton>
+          <BaseButton to="/survey" size="sm">설문 수정</BaseButton>
+        </div>
+      </div>
 
       <SafetyNotice />
-    </section>
+    </div>
   </AppLayout>
 </template>
 
@@ -78,18 +97,18 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { reportApi } from '../../../shared/api'
-import { AppLayout, BaseButton, ContentSection, ErrorState, PageHeader, SafetyNotice } from '../../../shared/components'
+import { AppLayout, BaseButton, ErrorState, SafetyNotice } from '../../../shared/components'
 
 const PENDING_REPORT_KEY = 'neutripic:pending_report_payload'
 const LATEST_REPORT_KEY = 'neutripic:latest_report'
 
 const generationSteps = [
-  { id: 'validate', label: '입력 검증' },
-  { id: 'normalize', label: '한국어 입력 정규화' },
-  { id: 'rag', label: 'RAG 근거 검색' },
+  { id: 'validate', label: '입력 정보 확인' },
+  { id: 'normalize', label: '건강 목표 정규화' },
+  { id: 'rag', label: '근거 데이터 검색 · iDISK' },
   { id: 'functional', label: '기능성원료 데이터 확인' },
-  { id: 'write', label: '리포트 작성' },
-  { id: 'save', label: '추천 기록 저장' },
+  { id: 'write', label: '성분 리포트 작성' },
+  { id: 'save', label: '안전 문구 확인' },
 ]
 
 const router = useRouter()
@@ -99,13 +118,6 @@ const isGenerating = ref(false)
 const hasFailed = ref(false)
 const createError = ref('')
 const clarificationQuestions = ref([])
-
-const currentStepDescription = computed(() => {
-  if (hasFailed.value) return '현재 단계에서 처리가 중단되었습니다.'
-  if (!isGenerating.value) return '생성 요청을 준비하고 있습니다.'
-
-  return `${generationSteps[activeStepIndex.value]?.label ?? '마무리'} 중입니다.`
-})
 
 onMounted(() => {
   if (pendingPayload.value) {
@@ -156,7 +168,7 @@ async function playProgressUntil(targetIndex) {
 function getStepMarker(index) {
   if (hasFailed.value && index === activeStepIndex.value) return '!'
   if (index < activeStepIndex.value) return '✓'
-  return index + 1
+  return ''
 }
 
 function readPendingPayload() {
@@ -201,50 +213,191 @@ function getCreateReportErrorMessage(error) {
 <style scoped>
 .generation-page {
   display: grid;
-  gap: 20px;
+  gap: 18px;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 56px 24px;
+  animation: np-fade 0.3s ease both;
 }
 
-.step-list {
-  display: grid;
-  gap: 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.step-list__item {
+/* Header */
+.generation-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: var(--color-text-muted);
+  gap: 12px;
+  margin-bottom: 8px;
 }
 
-.step-list__marker {
-  display: inline-grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-full);
-  font-size: 13px;
-  font-weight: 800;
+.generation-spinner {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid var(--color-brand-50);
+  border-top-color: var(--color-brand);
+  animation: np-spin 0.9s linear infinite;
 }
 
-.step-list__item--done,
-.step-list__item--active {
-  color: var(--color-text);
+.generation-header h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #1a221e;
 }
 
-.step-list__item--done .step-list__marker,
-.step-list__item--active .step-list__marker {
+.generation-header p {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: #8b938c;
+}
+
+/* Step panel */
+.step-panel {
+  background: #fff;
+  border: 1px solid #e8ebe7;
+  border-radius: 14px;
+  padding: 24px 22px;
+}
+
+.step-item {
+  display: flex;
+  gap: 14px;
+  padding-bottom: 18px;
+}
+
+.step-item:last-child {
+  padding-bottom: 0;
+}
+
+.step-item__rail {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.step-item__marker {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1.5px solid #e4e7e3;
+  background: #f2f4f1;
+  color: #aab0a8;
+  transition: background 300ms, color 300ms, border-color 300ms;
+}
+
+.step-item__marker--done {
+  background: var(--color-brand);
   border-color: var(--color-brand);
-  background: var(--color-blue-100);
+  color: #fff;
 }
 
-.step-list__item--failed,
-.step-list__item--failed .step-list__marker {
+.step-item__marker--active {
+  background: var(--color-brand-50);
+  border-color: var(--color-brand);
+  color: var(--color-brand);
+}
+
+.step-item__marker--failed {
+  background: #fbece9;
   border-color: #b5483c;
   color: #8f2f23;
+}
+
+.step-item__line {
+  width: 2px;
+  flex: 1;
+  margin-top: 4px;
+  min-height: 6px;
+  background: #e4e7e3;
+  transition: background 300ms;
+}
+
+.step-item__line--done,
+.step-item__line--active {
+  background: var(--color-brand);
+}
+
+.step-item__content {
+  padding-top: 2px;
+}
+
+.step-item__label {
+  font-size: 14.5px;
+  line-height: 1.4;
+  color: #aab0a8;
+  font-weight: 500;
+  transition: color 300ms, font-weight 300ms;
+}
+
+.step-item__label--done,
+.step-item__label--active {
+  color: #1a221e;
+  font-weight: 600;
+}
+
+.step-item__label--active {
+  font-weight: 700;
+}
+
+.step-item__label--failed {
+  color: #8f2f23;
+}
+
+.step-item__progress {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-brand);
+  margin-top: 3px;
+  animation: np-pulse 1.2s ease-in-out infinite;
+}
+
+/* Footer */
+.generation-footer {
+  text-align: center;
+}
+
+.generation-back {
+  color: #9aa19b;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 8px;
+}
+
+.generation-back:hover {
+  color: #1a221e;
+}
+
+/* Notices */
+.clarification-notice,
+.error-notice {
+  padding: 18px;
+  border: 1px solid #e8ebe7;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.clarification-notice__title,
+.error-notice__title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a221e;
+  margin-bottom: 6px;
+}
+
+.clarification-notice p,
+.error-notice p {
+  margin: 0 0 12px;
+  font-size: 13.5px;
+  color: #6b736d;
 }
 
 .question-list {
@@ -252,6 +405,21 @@ function getCreateReportErrorMessage(error) {
   gap: 8px;
   margin: 0 0 16px;
   padding-left: 20px;
+  font-size: 14px;
+  color: #3a423d;
+}
+
+.action-link {
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  background: var(--color-brand-50);
+  color: var(--color-brand-strong);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
 }
 
 .error-actions {
