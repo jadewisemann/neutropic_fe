@@ -112,7 +112,7 @@ function formatShortDate(value) {
 
 <style scoped>
 .reports-page {
-  max-width: 1280px;
+  max-width: 1024px;
   margin: 0 auto;
   padding: 36px 24px 56px;
   animation: np-fade 0.3s ease both;
@@ -134,7 +134,7 @@ function formatShortDate(value) {
 
 .reports-page__header h1 {
   margin: 0 0 5px;
-  font-size: 26px;
+  font-size: 30px;
   font-weight: 700;
   line-height: 1.3;
   color: #1a221e;
@@ -170,16 +170,22 @@ function formatShortDate(value) {
 }
 
 .report-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
+}
+
+@media (max-width: 560px) {
+  .report-list {
+    grid-template-columns: 1fr;
+  }
 }
 
 .report-card {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 18px 20px;
+  padding: 22px 24px;
   background: #fff;
   border: 1px solid #e8ebe7;
   border-radius: 13px;

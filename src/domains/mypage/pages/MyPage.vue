@@ -107,7 +107,7 @@ async function loadSummary() {
 
 <style scoped>
 .mypage {
-  max-width: 1280px;
+  max-width: 1024px;
   margin: 0 auto;
   padding: 36px 24px 56px;
   animation: np-fade 0.3s ease both;
@@ -125,8 +125,8 @@ async function loadSummary() {
 .mypage__profile-card {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 22px;
+  gap: 20px;
+  padding: 28px 26px;
   background: #fff;
   border: 1px solid #e8ebe7;
   border-radius: 14px;
@@ -137,12 +137,12 @@ async function loadSummary() {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 56px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
   background: var(--color-brand-50);
   color: var(--color-brand);
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 700;
   line-height: 1;
 }
@@ -153,7 +153,7 @@ async function loadSummary() {
 }
 
 .mypage__name {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 700;
   color: #1a221e;
   line-height: 1.3;
@@ -198,7 +198,7 @@ async function loadSummary() {
 }
 
 .mypage__stat {
-  padding: 18px;
+  padding: 24px 20px;
   background: #fff;
   border: 1px solid #e8ebe7;
   border-radius: 12px;
@@ -206,15 +206,15 @@ async function loadSummary() {
 }
 
 .mypage__stat-number {
-  font-size: 26px;
+  font-size: 34px;
   font-weight: 700;
   color: #1a221e;
   line-height: 1;
 }
 
 .mypage__stat-label {
-  margin-top: 6px;
-  font-size: 12.5px;
+  margin-top: 8px;
+  font-size: 14px;
   font-weight: 500;
   color: #8b938c;
   line-height: 1.4;
@@ -232,9 +232,9 @@ async function loadSummary() {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 18px;
+  padding: 20px 22px;
   border-bottom: 1px solid #eef0ec;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   color: #2d352f;
   text-decoration: none;

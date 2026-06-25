@@ -371,7 +371,7 @@ function formatGender(value) {
   background: #fff;
   border: 1px solid #e8ebe7;
   border-radius: 14px;
-  padding: 26px 28px;
+  padding: 32px 34px;
 }
 
 .report-header-card__badges {
@@ -383,8 +383,8 @@ function formatGender(value) {
 }
 
 .report-header-card h1 {
-  margin: 0 0 6px;
-  font-size: 27px;
+  margin: 0 0 8px;
+  font-size: 32px;
   font-weight: 700;
   letter-spacing: -0.02em;
   color: #1a221e;
@@ -427,7 +427,7 @@ function formatGender(value) {
   background: #fff;
   border: 1px solid #e8ebe7;
   border-radius: 13px;
-  padding: 20px 22px;
+  padding: 26px 28px;
 }
 
 .ingredient-card__top {
@@ -439,7 +439,7 @@ function formatGender(value) {
 }
 
 .ingredient-card__name {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: #1a221e;
   line-height: 1.3;

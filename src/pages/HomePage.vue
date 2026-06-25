@@ -103,7 +103,7 @@ onUnmounted(() => {
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
   gap: 32px;
-  max-width: 1280px;
+  max-width: 1024px;
   width: 100%;
   margin: 0 auto;
   padding: 58px 24px 26px;
@@ -132,9 +132,8 @@ onUnmounted(() => {
 }
 
 .home-hero h1 {
-  max-width: 620px;
   margin: 0;
-  font-size: 48px;
+  font-size: 56px;
   font-weight: 800;
   line-height: 1.08;
   letter-spacing: 0;
@@ -151,10 +150,9 @@ onUnmounted(() => {
 }
 
 .home-hero__description {
-  max-width: 650px;
   margin: 24px 0 0;
   color: #5a625b;
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.75;
 }
 
@@ -207,13 +205,13 @@ onUnmounted(() => {
 
 .home-slider {
   --slide-gap: 16px;
-  --slide-size: min(1112px, calc(100vw - 48px));
+  --slide-size: min(calc(1024px - 48px), calc(100vw - 48px));
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
   flex: 1;
   min-height: 0;
   width: 100%;
-  max-width: 1280px;
+  max-width: 1024px;
   margin: 0 auto;
   padding: 0 24px 24px;
 }
@@ -264,7 +262,7 @@ onUnmounted(() => {
   }
 
   .home-hero h1 {
-    font-size: 36px;
+    font-size: 40px;
   }
 
   .home-hero__description {

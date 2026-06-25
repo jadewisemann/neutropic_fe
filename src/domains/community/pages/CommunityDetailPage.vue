@@ -520,7 +520,7 @@ function formatRelativeTime(value) {
   display: grid;
   gap: 12px;
   margin: 0 auto;
-  width: min(100%, 1280px);
+  width: min(100%, 1024px);
   padding: 28px 24px 56px;
   animation: np-fade 0.3s ease both;
 }
@@ -565,9 +565,9 @@ function formatRelativeTime(value) {
 /* Thread item grid */
 .thread-item {
   display: grid;
-  grid-template-columns: 52px minmax(0, 1fr);
-  gap: 12px;
-  padding: 18px 20px;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 14px;
+  padding: 22px 24px;
   border-bottom: 1px solid #eef0ec;
 }
 
@@ -593,20 +593,20 @@ function formatRelativeTime(value) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: var(--color-brand-50);
   color: var(--color-brand);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
   line-height: 1;
 }
 
 .thread-avatar--lg {
-  width: 44px;
-  height: 44px;
-  font-size: 16px;
+  width: 48px;
+  height: 48px;
+  font-size: 17px;
 }
 
 .thread-avatar--sm {

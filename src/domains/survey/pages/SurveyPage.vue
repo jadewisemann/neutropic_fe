@@ -373,12 +373,12 @@ function getValidProfileDefaults(user) {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  min-height: 44px;
-  padding: var(--space-2) var(--space-4);
+  min-height: 50px;
+  padding: var(--space-3) var(--space-5);
   border: 1.5px solid #e4e7e3;
   border-radius: 10px;
   color: #3a423d;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
   transition: border-color 150ms, background 150ms, color 150ms;
@@ -450,8 +450,8 @@ textarea.form-control {
 
 .action-bar__prev {
   flex: none;
-  width: 80px;
-  height: 50px;
+  width: 90px;
+  height: 56px;
   border: 1.5px solid #d4dad4;
   border-radius: 11px;
   background: #fff;
@@ -474,7 +474,7 @@ textarea.form-control {
 
 .action-bar__next {
   flex: 1;
-  height: 50px;
+  height: 56px;
   border: none;
   border-radius: 11px;
   background: var(--color-brand);

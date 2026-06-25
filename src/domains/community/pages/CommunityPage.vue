@@ -196,7 +196,7 @@ function buildGeneratedTitle(content) {
 .community-page {
   display: grid;
   gap: 0;
-  max-width: 1280px;
+  max-width: 1024px;
   margin: 0 auto;
   padding: 28px 24px 56px;
   animation: np-fade 0.3s ease both;
@@ -219,7 +219,7 @@ function buildGeneratedTitle(content) {
 .community-page__header h1 {
   margin: 0;
   color: #1a221e;
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 700;
 }
 
@@ -340,9 +340,9 @@ function buildGeneratedTitle(content) {
 
 .thread-post {
   display: grid;
-  grid-template-columns: 52px minmax(0, 1fr);
-  gap: 12px;
-  padding: 18px 20px;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 14px;
+  padding: 22px 24px;
   border-bottom: 1px solid #eef0ec;
 }
 
@@ -358,12 +358,12 @@ function buildGeneratedTitle(content) {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: var(--color-brand-50);
   color: var(--color-brand);
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 700;
 }
 
@@ -399,8 +399,8 @@ function buildGeneratedTitle(content) {
 .thread-post__content {
   margin: 0;
   color: #2d352f;
-  font-size: 14.5px;
-  line-height: 1.62;
+  font-size: 15px;
+  line-height: 1.65;
   white-space: pre-wrap;
 }
 

@@ -33,8 +33,8 @@ defineProps({
 <style scoped>
 .content-section {
   display: grid;
-  gap: var(--space-4);
-  padding: 20px 22px;
+  gap: var(--space-5);
+  padding: 26px 28px;
   border: 1px solid #e8ebe7;
   border-radius: 13px;
   background: var(--color-surface);
@@ -61,7 +61,7 @@ defineProps({
 
 .content-section h2 {
   margin: 0;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 800;
   letter-spacing: 0;
   color: var(--color-text);
@@ -69,7 +69,7 @@ defineProps({
 
 @media (min-width: 720px) {
   .content-section {
-    padding: 22px 26px;
+    padding: 30px 32px;
   }
 }
 </style>
