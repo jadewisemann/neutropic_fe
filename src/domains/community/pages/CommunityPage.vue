@@ -196,10 +196,16 @@ function buildGeneratedTitle(content) {
 .community-page {
   display: grid;
   gap: 0;
-  max-width: 600px;
+  max-width: 1024px;
   margin: 0 auto;
-  padding: 28px 20px 56px;
+  padding: 28px 24px 56px;
   animation: np-fade 0.3s ease both;
+}
+
+@media (max-width: 640px) {
+  .community-page {
+    padding: 20px 16px 40px;
+  }
 }
 
 .community-page__header {
@@ -261,8 +267,11 @@ function buildGeneratedTitle(content) {
   display: flex;
   align-items: center;
   gap: 11px;
-  padding: 14px 4px;
-  border-bottom: 1px solid #eef0ec;
+  padding: 14px 18px;
+  background: #fff;
+  border: 1px solid #e8ebe7;
+  border-radius: 12px;
+  margin-bottom: 16px;
 }
 
 .quick-composer__avatar {
@@ -329,7 +338,7 @@ function buildGeneratedTitle(content) {
   display: grid;
   grid-template-columns: 52px minmax(0, 1fr);
   gap: 12px;
-  padding: 18px 4px;
+  padding: 18px 2px;
   border-bottom: 1px solid #eef0ec;
 }
 

@@ -112,10 +112,16 @@ function formatShortDate(value) {
 
 <style scoped>
 .reports-page {
-  max-width: 780px;
+  max-width: 1024px;
   margin: 0 auto;
   padding: 36px 24px 56px;
   animation: np-fade 0.3s ease both;
+}
+
+@media (max-width: 640px) {
+  .reports-page {
+    padding: 24px 16px 40px;
+  }
 }
 
 .reports-page__header {

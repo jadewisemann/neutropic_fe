@@ -520,9 +520,15 @@ function formatRelativeTime(value) {
   display: grid;
   gap: 12px;
   margin: 0 auto;
-  width: min(100%, 640px);
-  padding: 28px 20px 56px;
+  width: min(100%, 1024px);
+  padding: 28px 24px 56px;
   animation: np-fade 0.3s ease both;
+}
+
+@media (max-width: 640px) {
+  .post-detail {
+    padding: 20px 16px 40px;
+  }
 }
 
 .detail-row-actions {
@@ -550,7 +556,10 @@ function formatRelativeTime(value) {
 .thread-section {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid #eef0ec;
+  background: #fff;
+  border: 1px solid #e8ebe7;
+  border-radius: 14px;
+  overflow: hidden;
 }
 
 /* Thread item grid */
@@ -558,7 +567,7 @@ function formatRelativeTime(value) {
   display: grid;
   grid-template-columns: 52px minmax(0, 1fr);
   gap: 12px;
-  padding: 18px 4px;
+  padding: 18px 20px;
   border-bottom: 1px solid #eef0ec;
 }
 
@@ -834,7 +843,7 @@ function formatRelativeTime(value) {
 
 /* Root comment trigger */
 .root-composer {
-  padding: 16px 4px;
+  padding: 16px 20px;
   border-top: 1px solid #eef0ec;
 }
 

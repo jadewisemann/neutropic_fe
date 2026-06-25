@@ -29,7 +29,7 @@ defineProps({
 
 <style scoped>
 .report-layout {
-  max-width: 1160px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 28px 24px 56px;
   animation: np-fade 0.3s ease both;
@@ -58,13 +58,19 @@ defineProps({
   top: 76px;
 }
 
-@media (max-width: 920px) {
+@media (max-width: 1024px) {
   .report-layout__content {
     grid-template-columns: 1fr;
   }
 
   .report-layout__aside {
     position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .report-layout {
+    padding: 20px 16px 40px;
   }
 }
 </style>

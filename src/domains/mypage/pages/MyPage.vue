@@ -107,12 +107,18 @@ async function loadSummary() {
 
 <style scoped>
 .mypage {
-  max-width: 680px;
+  max-width: 1024px;
   margin: 0 auto;
   padding: 36px 24px 56px;
   animation: np-fade 0.3s ease both;
   display: grid;
   gap: 18px;
+}
+
+@media (max-width: 640px) {
+  .mypage {
+    padding: 24px 16px 40px;
+  }
 }
 
 /* Profile card */

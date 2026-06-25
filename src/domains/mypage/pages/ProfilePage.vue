@@ -184,12 +184,18 @@ async function deleteAccount() {
 
 <style scoped>
 .profile-page {
-  max-width: 520px;
+  max-width: 1024px;
   margin: 0 auto;
   padding: 32px 24px 56px;
   display: grid;
   gap: 16px;
   animation: np-fade 0.3s ease both;
+}
+
+@media (max-width: 640px) {
+  .profile-page {
+    padding: 24px 16px 40px;
+  }
 }
 
 .profile-page__header {

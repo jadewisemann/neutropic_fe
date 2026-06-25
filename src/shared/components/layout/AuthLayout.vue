@@ -37,16 +37,33 @@ const titleId = `auth-layout-${props.title.replace(/\s+/g, '-').toLowerCase()}`
 .auth-layout {
   display: flex;
   justify-content: center;
-  padding: 0 24px;
+  align-items: flex-start;
+  padding: 56px 24px;
   background: #f7f8f6;
   min-height: calc(100vh - 60px);
 }
 
 .auth-layout__panel {
   width: 100%;
-  max-width: 420px;
-  padding: 56px 0;
+  max-width: 480px;
+  padding: 40px 44px;
+  background: #fff;
+  border: 1px solid #e8ebe7;
+  border-radius: 16px;
+  box-shadow: var(--shadow-raised);
   animation: np-fade 0.3s ease both;
+}
+
+@media (max-width: 640px) {
+  .auth-layout {
+    padding: 24px 16px;
+    align-items: stretch;
+  }
+
+  .auth-layout__panel {
+    padding: 32px 24px;
+    border-radius: 12px;
+  }
 }
 
 .auth-layout__header {

@@ -223,18 +223,27 @@ function getCreateReportErrorMessage(error) {
 .generation-page {
   display: grid;
   gap: 18px;
-  max-width: 480px;
+  max-width: 1024px;
   margin: 0 auto;
   padding: 56px 24px;
   animation: np-fade 0.3s ease both;
+}
+
+@media (max-width: 640px) {
+  .generation-page {
+    padding: 36px 16px 40px;
+  }
 }
 
 /* Header */
 .generation-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: 16px;
+  padding: 22px 24px;
+  background: #fff;
+  border: 1px solid #e8ebe7;
+  border-radius: 14px;
 }
 
 .generation-spinner {
