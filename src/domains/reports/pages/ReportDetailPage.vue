@@ -110,11 +110,14 @@
         v-model="chatInput"
         title="리포트 채팅"
         description="이 리포트의 성분·섭취법을 물어볼 수 있어요. 진단·처방은 안내해 드릴 수 없어요."
+        :limit-notice="reportLimitMessages.reportChat"
         :messages="chatMessages"
         :is-loading="isChatLoading"
         :is-submitting="isChatSubmitting"
+        :submit-disabled="isReportChatLimited"
         :error-message="chatError"
         @submit="sendChatMessage"
+        @disabled-submit="showReportChatLimitToast"
       />
     </template>
   </ReportLayout>
@@ -131,9 +134,14 @@ import {
   ReportChatPanel,
   ReportLayout,
 } from '../../../shared/components'
+import { getRateLimitMessage, reportLimitMessages } from '../../../shared/constants/reportLimits'
+import { useRateLimitStatus } from '../../../shared/composables/useRateLimitStatus'
+import { useToast } from '../../../shared/composables/useToast'
 
 const route = useRoute()
 const router = useRouter()
+const { showToast } = useToast()
+const { isReportChatLimited, reportChatLimitedMessage, markLimitedFromError } = useRateLimitStatus()
 const report = ref(null)
 const isLoading = ref(true)
 const loadError = ref('')
@@ -244,10 +252,22 @@ async function sendChatMessage(content) {
     const assistantMessage = await reportApi.sendMessage(reportId.value, { content })
     chatMessages.value = [...chatMessages.value, assistantMessage]
   } catch (error) {
-    chatError.value = error?.message || '질문을 보내지 못했습니다.'
+    if (error?.errorCode === 'rate_limit_exceeded') {
+      chatError.value = markLimitedFromError(
+        error,
+        getRateLimitMessage(error, '오늘 보낼 수 있는 리포트 채팅 횟수를 모두 사용했습니다.'),
+      )
+      showToast(chatError.value, { type: 'error' })
+    } else {
+      chatError.value = error?.message || '질문을 보내지 못했습니다.'
+    }
   } finally {
     isChatSubmitting.value = false
   }
+}
+
+function showReportChatLimitToast() {
+  showToast(reportChatLimitedMessage.value || reportLimitMessages.reportChat, { type: 'error' })
 }
 
 function getLocalChatGuardrailMessage(content) {

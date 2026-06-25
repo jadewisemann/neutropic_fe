@@ -98,6 +98,9 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { reportApi } from '../../../shared/api'
 import { AppLayout, BaseButton, ErrorState, SafetyNotice } from '../../../shared/components'
+import { getRateLimitMessage } from '../../../shared/constants/reportLimits'
+import { useRateLimitStatus } from '../../../shared/composables/useRateLimitStatus'
+import { useToast } from '../../../shared/composables/useToast'
 
 const PENDING_REPORT_KEY = 'neutripic:pending_report_payload'
 const LATEST_REPORT_KEY = 'neutripic:latest_report'
@@ -112,6 +115,8 @@ const generationSteps = [
 ]
 
 const router = useRouter()
+const { showToast } = useToast()
+const { markLimitedFromError } = useRateLimitStatus()
 const pendingPayload = ref(readPendingPayload())
 const activeStepIndex = ref(0)
 const isGenerating = ref(false)
@@ -153,6 +158,10 @@ async function startGeneration() {
   } catch (error) {
     hasFailed.value = true
     createError.value = getCreateReportErrorMessage(error)
+    if (error?.errorCode === 'rate_limit_exceeded') {
+      const message = markLimitedFromError(error, createError.value)
+      showToast(message || createError.value, { type: 'error' })
+    }
   } finally {
     isGenerating.value = false
   }
@@ -195,7 +204,7 @@ function delay(ms) {
 
 function getCreateReportErrorMessage(error) {
   if (error?.errorCode === 'rate_limit_exceeded') {
-    return '오늘 생성 가능한 리포트 횟수를 초과했습니다. 잠시 후 다시 시도해 주세요.'
+    return getRateLimitMessage(error, '오늘 생성 가능한 리포트 횟수를 모두 사용했습니다.')
   }
 
   if (error?.errorCode === 'validation_error') {

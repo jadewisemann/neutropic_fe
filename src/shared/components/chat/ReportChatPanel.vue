@@ -3,6 +3,7 @@
     <header class="chat-panel__header">
       <div class="chat-panel__title">{{ title }}</div>
       <p class="chat-panel__desc">{{ description }}</p>
+      <p v-if="limitNotice" class="chat-panel__limit">{{ limitNotice }}</p>
     </header>
 
     <div ref="messagesEl" class="chat-panel__messages">
@@ -23,20 +24,20 @@
       </div>
     </div>
 
-    <div class="chat-panel__input-row">
+    <div class="chat-panel__input-row" @click.capture="handleDisabledSubmitAttempt">
       <input
         class="chat-panel__input"
         type="text"
         :value="modelValue"
         :placeholder="placeholder"
-        :disabled="isSubmitting"
+        :disabled="isSubmitting || submitDisabled"
         @input="$emit('update:modelValue', $event.target.value)"
         @keydown.enter.prevent="handleSubmit"
       />
       <button
         class="chat-panel__send"
         type="button"
-        :disabled="isSubmitting || !modelValue.trim()"
+        :disabled="isSubmitButtonDisabled"
         @click="handleSubmit"
       >
         ↑
@@ -60,7 +61,7 @@
 </template>
 
 <script setup>
-import { nextTick, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 
 const props = defineProps({
   title: {
@@ -95,10 +96,19 @@ const props = defineProps({
     type: String,
     default: '성분에 대해 물어보기…',
   },
+  limitNotice: {
+    type: String,
+    default: '',
+  },
+  submitDisabled: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-const emit = defineEmits(['update:modelValue', 'submit'])
+const emit = defineEmits(['update:modelValue', 'submit', 'disabled-submit'])
 const messagesEl = ref(null)
+const isSubmitButtonDisabled = computed(() => props.isSubmitting || props.submitDisabled || !props.modelValue.trim())
 
 const defaultSuggestions = [
   '이 성분들 함께 먹어도 되나요?',
@@ -118,8 +128,18 @@ watch(
 
 function handleSubmit() {
   const content = props.modelValue.trim()
+  if (props.submitDisabled) {
+    emit('disabled-submit')
+    return
+  }
   if (!content || props.isSubmitting) return
   emit('submit', content)
+}
+
+function handleDisabledSubmitAttempt() {
+  if (props.submitDisabled) {
+    emit('disabled-submit')
+  }
 }
 </script>
 
@@ -152,6 +172,13 @@ function handleSubmit() {
   font-size: 11.5px;
   line-height: 1.5;
   color: #8b938c;
+}
+
+.chat-panel__limit {
+  margin: 8px 0 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #6b736d;
 }
 
 .chat-panel__messages {

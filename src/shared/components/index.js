@@ -1,6 +1,7 @@
 export * from './base'
 export * from './chat'
 export * from './data'
+export * from './feedback'
 export * from './form'
 export * from './headless'
 export * from './layout'
