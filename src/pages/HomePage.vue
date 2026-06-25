@@ -8,7 +8,7 @@
           제품을 권하지 않습니다. 검증된 근거로 어떤 성분이 왜 필요한지, 무엇을 주의해야 하는지 설명합니다.
         </p>
         <div class="home-hero__actions">
-          <RouterLink class="home-btn home-btn--primary" to="/login?redirect_to=/survey">추천 시작</RouterLink>
+          <RouterLink class="home-btn home-btn--primary" to="/survey">추천 시작</RouterLink>
           <RouterLink class="home-btn" to="/community">커뮤니티 보기</RouterLink>
         </div>
       </div>

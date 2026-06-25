@@ -112,6 +112,7 @@
         description="이 리포트의 성분·섭취법을 물어볼 수 있어요. 진단·처방은 안내해 드릴 수 없어요."
         :limit-notice="reportLimitMessages.reportChat"
         :messages="chatMessages"
+        :suggestions="reportChatSuggestions"
         :is-loading="isChatLoading"
         :is-submitting="isChatSubmitting"
         :submit-disabled="isReportChatLimited"
@@ -156,6 +157,16 @@ const recommendedIngredients = computed(() => report.value?.recommended_ingredie
 const topGoals = computed(() => {
   const goals = report.value?.input_summary?.health_goals
   return Array.isArray(goals) ? goals.slice(0, 2) : []
+})
+const reportChatSuggestions = computed(() => {
+  const firstIngredient = recommendedIngredients.value[0]
+  const firstIngredientName = firstIngredient?.name_ko || firstIngredient?.name_en || '첫 번째 추천 성분'
+  const firstGoal = topGoals.value[0] || '건강 목표'
+
+  return [
+    `${firstIngredientName}은 왜 추천됐나요?`,
+    `${firstGoal}에 가장 중요한 성분은 무엇인가요?`,
+  ]
 })
 const summaryLine = computed(() => {
   const s = report.value?.input_summary

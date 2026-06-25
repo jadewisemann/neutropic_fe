@@ -6,16 +6,6 @@
         <span>상업적 후기·판매 글은 제한돼요</span>
       </header>
 
-      <div class="community-tabs" aria-label="커뮤니티 주제">
-        <button
-          v-for="(tab, index) in communityTabs"
-          :key="tab"
-          type="button"
-          :class="{ 'community-tabs__item--active': index === 0 }"
-        >
-          {{ tab }}
-        </button>
-      </div>
 
       <!-- Inline composer -->
       <div class="quick-composer">

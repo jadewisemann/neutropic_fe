@@ -88,7 +88,11 @@
             title="선택지가 없습니다"
             description="현재 단계에서 표시할 선택지가 없습니다."
           />
-          <div v-else class="chip-grid">
+          <div
+            v-else
+            class="chip-grid"
+            :class="{ 'chip-grid--health-goals': currentStep.id === 'health_goals' }"
+          >
             <label
               v-for="option in currentOptions"
               :key="option.code"
@@ -322,7 +326,7 @@ function getValidProfileDefaults(user) {
 <style scoped>
 /* ---- Progress strip ---- */
 .survey-progress {
-  margin-bottom: 28px;
+  margin-bottom: 0;
 }
 
 .survey-progress__meta {
@@ -359,6 +363,10 @@ function getValidProfileDefaults(user) {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
+}
+
+.chip-grid--health-goals {
+  gap: var(--space-3);
 }
 
 .chip-grid label {

@@ -12,6 +12,8 @@ import AppLayout from './AppLayout.vue'
 
 <style scoped>
 .survey-layout {
+  display: grid;
+  gap: var(--space-6);
   max-width: 560px;
   margin: 0 auto;
   padding: 32px 24px 56px;

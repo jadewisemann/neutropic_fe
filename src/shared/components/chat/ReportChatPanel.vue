@@ -48,7 +48,7 @@
 
     <div class="chat-panel__suggestions">
       <button
-        v-for="(q, i) in defaultSuggestions"
+        v-for="(q, i) in displayedSuggestions"
         :key="i"
         class="chat-panel__suggestion"
         type="button"
@@ -104,6 +104,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  suggestions: {
+    type: Array,
+    default: () => [],
+  },
 })
 
 const emit = defineEmits(['update:modelValue', 'submit', 'disabled-submit'])
@@ -111,9 +115,10 @@ const messagesEl = ref(null)
 const isSubmitButtonDisabled = computed(() => props.isSubmitting || props.submitDisabled || !props.modelValue.trim())
 
 const defaultSuggestions = [
-  '이 성분들 함께 먹어도 되나요?',
-  '마그네슘 형태 차이는?',
+  '첫 번째 추천 성분명은 왜 추천됐나요?',
+  '건강 목표에 가장 중요한 성분은 무엇인가요?',
 ]
+const displayedSuggestions = computed(() => (props.suggestions.length ? props.suggestions : defaultSuggestions))
 
 watch(
   () => props.messages,
