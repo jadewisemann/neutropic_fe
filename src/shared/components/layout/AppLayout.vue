@@ -59,7 +59,7 @@
       <slot />
     </main>
 
-    <footer class="app-layout__footer">
+    <footer v-if="!hideFooter" class="app-layout__footer">
       <p>Neutripic · 성분 중심 AI 리포트 · 본 서비스는 의료 진단·처방이 아닌 건강 정보를 제공합니다.</p>
     </footer>
   </div>
@@ -67,6 +67,10 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+
+const props = defineProps({
+  hideFooter: { type: Boolean, default: false },
+})
 import { useRoute, useRouter } from 'vue-router'
 import { authApi, authTokenStorage } from '../../api'
 
@@ -389,11 +393,14 @@ function handleDocumentKeydown(event) {
 
 /* ---- Main ---- */
 .app-layout__main {
+  display: flex;
+  flex-direction: column;
   flex: 1;
   width: 100%;
   max-width: none;
   margin: 0 auto;
   padding: 0;
+  min-height: 0;
 }
 
 /* ---- Footer ---- */
