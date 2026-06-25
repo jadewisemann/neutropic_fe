@@ -196,7 +196,7 @@ function buildGeneratedTitle(content) {
 .community-page {
   display: grid;
   gap: 0;
-  max-width: 1024px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 28px 24px 56px;
   animation: np-fade 0.3s ease both;
@@ -270,7 +270,7 @@ function buildGeneratedTitle(content) {
   padding: 14px 18px;
   background: #fff;
   border: 1px solid #e8ebe7;
-  border-radius: 12px;
+  border-radius: 14px;
   margin-bottom: 16px;
 }
 
@@ -332,13 +332,17 @@ function buildGeneratedTitle(content) {
 .post-list {
   display: grid;
   width: 100%;
+  background: #fff;
+  border: 1px solid #e8ebe7;
+  border-radius: 14px;
+  overflow: hidden;
 }
 
 .thread-post {
   display: grid;
   grid-template-columns: 52px minmax(0, 1fr);
   gap: 12px;
-  padding: 18px 2px;
+  padding: 18px 20px;
   border-bottom: 1px solid #eef0ec;
 }
 

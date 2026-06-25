@@ -14,7 +14,7 @@ import AppLayout from './AppLayout.vue'
 .survey-layout {
   display: grid;
   gap: var(--space-6);
-  max-width: 1024px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 32px 24px 56px;
   animation: np-fade 0.3s ease both;

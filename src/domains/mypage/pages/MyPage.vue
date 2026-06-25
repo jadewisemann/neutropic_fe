@@ -107,7 +107,7 @@ async function loadSummary() {
 
 <style scoped>
 .mypage {
-  max-width: 1024px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 36px 24px 56px;
   animation: np-fade 0.3s ease both;

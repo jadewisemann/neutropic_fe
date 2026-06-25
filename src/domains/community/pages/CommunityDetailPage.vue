@@ -520,7 +520,7 @@ function formatRelativeTime(value) {
   display: grid;
   gap: 12px;
   margin: 0 auto;
-  width: min(100%, 1024px);
+  width: min(100%, 1280px);
   padding: 28px 24px 56px;
   animation: np-fade 0.3s ease both;
 }

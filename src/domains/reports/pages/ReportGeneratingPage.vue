@@ -223,7 +223,7 @@ function getCreateReportErrorMessage(error) {
 .generation-page {
   display: grid;
   gap: 18px;
-  max-width: 1024px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 56px 24px;
   animation: np-fade 0.3s ease both;
