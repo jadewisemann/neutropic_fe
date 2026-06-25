@@ -1,75 +1,72 @@
 <template>
-  <section class="chat-panel report-chat-panel" :aria-labelledby="titleId">
+  <div class="chat-panel">
     <header class="chat-panel__header">
-      <div :id="titleId" class="chat-panel__title">{{ title }}</div>
+      <div class="chat-panel__title">{{ title }}</div>
       <p class="chat-panel__desc">{{ description }}</p>
       <p v-if="limitNotice" class="chat-panel__limit">{{ limitNotice }}</p>
     </header>
 
-    <p v-if="isLoading" class="report-chat-panel__status">채팅 내역을 불러오는 중입니다.</p>
-    <div v-else ref="messagesEl" class="chat-panel__messages report-chat-panel__messages">
+    <div ref="messagesEl" class="chat-panel__messages">
+      <p v-if="isLoading" class="chat-panel__status">채팅 내역을 불러오는 중입니다.</p>
+      <p v-else-if="messages.length === 0" class="chat-panel__status">
+        이 리포트의 성분·섭취법에 대해 물어볼 수 있어요. 진단·처방은 도와드릴 수 없어요.
+      </p>
       <div
         v-for="message in messages"
         :key="message.id ?? message.content ?? message.text"
-        class="report-chat-panel__message"
-        :class="{ 'report-chat-panel__message--user': message.role === 'user' || message.variant === 'user' }"
+        class="chat-panel__message"
+        :class="{
+          'chat-panel__message--user': message.role === 'user' || message.variant === 'user',
+          'chat-panel__message--block': message.role === 'block',
+        }"
       >
-        <p>{{ message.content ?? message.text }}</p>
-        <p v-if="message.guardrail_result" class="report-chat-panel__meta">
-          안전 검사: {{ formatGuardrail(message.guardrail_result) }}
-        </p>
-        <ul v-if="message.citations?.length" class="report-chat-panel__citations">
-          <li v-for="citation in message.citations" :key="`${message.id}-${citation.document_id}`">
-            {{ citation.source_name || citation.document_id }}
-          </li>
-        </ul>
+        {{ message.content ?? message.text }}
       </div>
     </div>
 
-    <form class="report-chat-panel__form" @submit.prevent="handleSubmit">
-      <div class="chat-panel__input-row" @click.capture="handleDisabledSubmitAttempt">
-        <input
-          class="chat-panel__input"
-          type="text"
-          :value="modelValue"
-          :placeholder="placeholder"
-          :disabled="isSubmitting || submitDisabled"
-          @input="$emit('update:modelValue', $event.target.value)"
-        />
-        <BaseButton variant="primary" type="submit" :disabled="isSubmitButtonDisabled">
-          {{ isSubmitting ? submittingLabel : submitLabel }}
-        </BaseButton>
-      </div>
-      <p v-if="errorMessage" class="report-chat-panel__error" role="alert">{{ errorMessage }}</p>
-    </form>
-
-    <div v-if="suggestedQuestions.length" class="report-chat-panel__suggestions" aria-label="추천 질문">
-      <button
-        v-for="question in suggestedQuestions"
-        :key="question"
-        class="report-chat-panel__suggestion"
-        type="button"
+    <div class="chat-panel__input-row" @click.capture="handleDisabledSubmitAttempt">
+      <input
+        class="chat-panel__input"
+        type="text"
+        :value="modelValue"
+        :placeholder="placeholder"
         :disabled="isSubmitting || submitDisabled"
-        @click="handleSuggestedQuestion(question)"
+        @input="$emit('update:modelValue', $event.target.value)"
+        @keydown.enter.prevent="handleSubmit"
+      />
+      <button
+        class="chat-panel__send"
+        type="button"
+        :disabled="isSubmitButtonDisabled"
+        @click="handleSubmit"
       >
-        {{ question }}
+        ↑
       </button>
     </div>
-  </section>
+
+    <p v-if="errorMessage" class="chat-panel__error" role="alert">{{ errorMessage }}</p>
+
+    <div class="chat-panel__suggestions">
+      <button
+        v-for="(q, i) in defaultSuggestions"
+        :key="i"
+        class="chat-panel__suggestion"
+        type="button"
+        @click="$emit('update:modelValue', q)"
+      >
+        {{ q }}
+      </button>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { computed, nextTick, ref, watch } from 'vue'
-import { BaseButton } from '../base'
 
 const props = defineProps({
   title: {
     type: String,
     required: true,
-  },
-  titleId: {
-    type: String,
-    default: 'chat-title',
   },
   description: {
     type: String,
@@ -97,19 +94,7 @@ const props = defineProps({
   },
   placeholder: {
     type: String,
-    default: '리포트 기반 질문을 입력하세요.',
-  },
-  submitLabel: {
-    type: String,
-    default: '질문 보내기',
-  },
-  submittingLabel: {
-    type: String,
-    default: '전송 중',
-  },
-  suggestedQuestions: {
-    type: Array,
-    default: () => [],
+    default: '성분에 대해 물어보기…',
   },
   limitNotice: {
     type: String,
@@ -125,11 +110,20 @@ const emit = defineEmits(['update:modelValue', 'submit', 'disabled-submit'])
 const messagesEl = ref(null)
 const isSubmitButtonDisabled = computed(() => props.isSubmitting || props.submitDisabled || !props.modelValue.trim())
 
-const suggestedQuestions = computed(() =>
-  props.suggestedQuestions
-    .map((question) => String(question ?? '').trim())
-    .filter(Boolean)
-    .slice(0, 2),
+const defaultSuggestions = [
+  '이 성분들 함께 먹어도 되나요?',
+  '마그네슘 형태 차이는?',
+]
+
+watch(
+  () => props.messages,
+  async () => {
+    await nextTick()
+    if (messagesEl.value) {
+      messagesEl.value.scrollTop = messagesEl.value.scrollHeight
+    }
+  },
+  { deep: true },
 )
 
 function handleSubmit() {
@@ -139,19 +133,7 @@ function handleSubmit() {
     return
   }
   if (!content || props.isSubmitting) return
-
   emit('submit', content)
-}
-
-function handleSuggestedQuestion(question) {
-  if (props.submitDisabled) {
-    emit('disabled-submit')
-    return
-  }
-  if (props.isSubmitting) return
-
-  emit('update:modelValue', question)
-  emit('submit', question)
 }
 
 function handleDisabledSubmitAttempt() {
@@ -159,25 +141,23 @@ function handleDisabledSubmitAttempt() {
     emit('disabled-submit')
   }
 }
-
-function formatGuardrail(result) {
-  if (!result) return ''
-  if (typeof result === 'string') return result
-  return result.message || result.reason || result.status || '확인됨'
-}
 </script>
 
 <style scoped>
-.report-chat-panel__messages {
-  display: grid;
-  gap: var(--space-3);
+.chat-panel {
+  display: flex;
+  flex-direction: column;
+  height: 560px;
+  background: #fff;
+  border: 1px solid #e8ebe7;
+  border-radius: 14px;
+  overflow: hidden;
 }
 
-.report-chat-panel__message {
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
-  background: #f0f6f3;
-  color: var(--color-text-soft);
+.chat-panel__header {
+  flex-shrink: 0;
+  padding: 16px 18px;
+  border-bottom: 1px solid #eef0ec;
 }
 
 .chat-panel__title {
@@ -214,68 +194,133 @@ function formatGuardrail(result) {
 
 .chat-panel__status {
   margin: 0;
+  font-size: 13px;
   line-height: 1.6;
+  color: #8b938c;
+  align-self: flex-start;
+  max-width: 86%;
+  padding: 10px 13px;
+  border-radius: 14px 14px 14px 4px;
+  background: #fff;
+  border: 1px solid #eef0ec;
 }
 
-.report-chat-panel__message--user {
-  background: #edf2ef;
+.chat-panel__message {
+  max-width: 86%;
+  padding: 10px 13px;
+  font-size: 13px;
+  line-height: 1.6;
+  border-radius: 14px 14px 14px 4px;
+  background: #fff;
+  border: 1px solid #eef0ec;
+  color: #2d352f;
+  align-self: flex-start;
 }
 
-.report-chat-panel__status,
-.report-chat-panel__meta,
-.report-chat-panel__error {
+.chat-panel__message--user {
+  align-self: flex-end;
+  border-radius: 14px 14px 4px 14px;
+  background: var(--color-brand);
+  border-color: var(--color-brand);
+  color: #fff;
+}
+
+.chat-panel__message--block {
+  align-self: flex-start;
+  background: #fbece9;
+  border-color: #f1cfca;
+  color: #9a352c;
+  border-radius: 12px;
+}
+
+.chat-panel__input-row {
+  flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid #eef0ec;
+}
+
+.chat-panel__input {
+  flex: 1;
+  height: 44px;
+  padding: 0 14px;
+  border: 1.5px solid #e4e7e3;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 13.5px;
+  outline: none;
+  background: #fff;
+  color: #2d352f;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+
+.chat-panel__input::placeholder {
+  color: #9aa19b;
+}
+
+.chat-panel__input:focus {
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px var(--color-brand-50);
+}
+
+.chat-panel__send {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 10px;
+  background: var(--color-brand);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 150ms;
+}
+
+.chat-panel__send:hover:not(:disabled) {
+  background: var(--color-brand-strong);
+}
+
+.chat-panel__send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chat-panel__error {
+  flex-shrink: 0;
   margin: 0;
-  color: #5b6b65;
-  font-size: 0.875rem;
+  padding: 8px 12px;
+  font-size: 12.5px;
+  color: #9a352c;
+  background: #fbece9;
 }
 
-.report-chat-panel__error {
-  color: #8f2f23;
-}
-
-.report-chat-panel__citations {
-  display: grid;
-  gap: 4px;
-  margin: 8px 0 0;
-  padding-left: 18px;
-  font-size: 0.875rem;
-}
-
-.report-chat-panel__form {
-  display: grid;
-  gap: var(--space-3);
-}
-
-.report-chat-panel :deep(.form-control) {
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.report-chat-panel__suggestions {
+.chat-panel__suggestions {
+  flex-shrink: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #f7f8f6;
+  border-top: 1px solid #eef0ec;
 }
 
-.report-chat-panel__suggestion {
-  min-height: 36px;
-  padding: 0 12px;
-  border: 1px solid #dfe8e3;
-  border-radius: var(--radius-sm);
+.chat-panel__suggestion {
+  padding: 6px 10px;
+  border: 1px solid #e4e7e3;
+  border-radius: 8px;
   background: #fff;
-  color: var(--color-text-soft);
-  cursor: pointer;
+  color: #5a625b;
   font: inherit;
-  font-size: 0.875rem;
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 150ms, color 150ms;
 }
 
-.report-chat-panel__suggestion:hover:not(:disabled) {
-  border-color: #b8ccc2;
-  background: #f7faf8;
-}
-
-.report-chat-panel__suggestion:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
+.chat-panel__suggestion:hover {
+  border-color: var(--color-brand);
+  color: var(--color-brand);
 }
 </style>

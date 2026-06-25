@@ -24,8 +24,8 @@ const isSubmitting = ref(false)
 async function createPost(payload) {
   errorMessage.value = ''
 
-  if (!payload.title || !payload.content) {
-    errorMessage.value = '제목과 내용을 입력해 주세요.'
+  if (!payload.content) {
+    errorMessage.value = '내용을 입력해 주세요.'
     return
   }
 
